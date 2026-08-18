@@ -4,9 +4,9 @@ MINIX is a local-first Android control-panel project. It contains the Compose UI
 
 ## Repository boundary
 
-This repository tracks source, Gradle configuration, tests, tools, and design/review documents. Device captures, reverse-engineering workspaces, APKs, native build output, local SDK paths, and signing keys stay outside Git and are covered by the root `.gitignore`.
+This repository tracks source, Gradle configuration, tests, tools, and design/review documents. Device captures, reverse-engineering workspaces, APKs, native build output, local SDK paths, and signing keys stay outside Git and are covered by the repository `.gitignore`.
 
-The current control path is certificate/shared-UID/Binder based. Historical `root` names remain in a few package, AIDL, and JNI identifiers for compatibility; they do not imply a root shell or a privileged daemon.
+The control path is certificate/shared-UID/Binder based. All control components use the `me.dartcv.minix.control` namespace and the ordinary `:control` Binder service process.
 
 ## Build
 

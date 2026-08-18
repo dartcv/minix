@@ -1,18 +1,18 @@
 package me.dartcv.minix.ui
 
-import me.dartcv.minix.root.RootConnectionStatus
-import me.dartcv.minix.root.RootFeature
-import me.dartcv.minix.root.RootInjectionApplyStatus
-import me.dartcv.minix.root.RootInjectionProfileStatus
-import me.dartcv.minix.root.RootInjectionState
-import me.dartcv.minix.root.RootNativeProbeState
-import me.dartcv.minix.root.RootNativeProbeStatus
-import me.dartcv.minix.root.RootReadOnlyFieldProfileStatus
-import me.dartcv.minix.root.RootReadOnlyFieldsState
-import me.dartcv.minix.root.RootRuntimeState
-import me.dartcv.minix.root.RootSearchIdInvalidReason
-import me.dartcv.minix.root.RootSearchIdResult
-import me.dartcv.minix.root.RootSearchIdStatus
+import me.dartcv.minix.control.ControlConnectionStatus
+import me.dartcv.minix.control.ControlFeature
+import me.dartcv.minix.control.ControlInjectionApplyStatus
+import me.dartcv.minix.control.ControlInjectionProfileStatus
+import me.dartcv.minix.control.ControlInjectionState
+import me.dartcv.minix.control.ControlNativeProbeState
+import me.dartcv.minix.control.ControlNativeProbeStatus
+import me.dartcv.minix.control.ControlReadOnlyFieldProfileStatus
+import me.dartcv.minix.control.ControlReadOnlyFieldsState
+import me.dartcv.minix.control.ControlRuntimeState
+import me.dartcv.minix.control.ControlSearchIdInvalidReason
+import me.dartcv.minix.control.ControlSearchIdResult
+import me.dartcv.minix.control.ControlSearchIdStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -23,17 +23,17 @@ class MinixAppTest {
     fun verifiedControlsAppearBeforeEvidenceGatedControls() {
         assertEquals(
             listOf(
-                RootFeature.FLIGHT,
-                RootFeature.FAKE_FLIGHT,
-                RootFeature.ANTI_FLASH,
-                RootFeature.READABLE_DATA,
-                RootFeature.AIM,
-                RootFeature.DRAW,
-                RootFeature.HITBOX,
+                ControlFeature.FLIGHT,
+                ControlFeature.FAKE_FLIGHT,
+                ControlFeature.ANTI_FLASH,
+                ControlFeature.READABLE_DATA,
+                ControlFeature.AIM,
+                ControlFeature.DRAW,
+                ControlFeature.HITBOX,
             ),
             controlFeatureDisplayOrder,
         )
-        assertFalse(RootFeature.PLAYER_TELEPORT in controlFeatureDisplayOrder)
+        assertFalse(ControlFeature.PLAYER_TELEPORT in controlFeatureDisplayOrder)
     }
 
     @Test
@@ -54,81 +54,81 @@ class MinixAppTest {
 
     @Test
     fun unresolvedFeaturesExplainWhyTheirSwitchesAreDisabled() {
-        val state = RootRuntimeState(
-            status = RootConnectionStatus.READY,
+        val state = ControlRuntimeState(
+            status = ControlConnectionStatus.READY,
             uid = 10001,
             targetPid = 42,
             targetUid = 10001,
             targetStartTimeTicks = "start-42",
         )
 
-        assertEquals("瞄准 · 未实现", controlFeatureTitle(RootFeature.AIM))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.AIM).contains("最终瞄准 writer"))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.DRAW).contains("完整投影"))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.HITBOX).contains("旧 worker 100 槽已闭合"))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.HITBOX).contains("全实体集合映射/生命周期未唯一化"))
-        assertEquals("模拟飞行", controlFeatureTitle(RootFeature.FAKE_FLIGHT))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.FAKE_FLIGHT).contains("档案未就绪"))
+        assertEquals("瞄准 · 未实现", controlFeatureTitle(ControlFeature.AIM))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.AIM).contains("最终瞄准 writer"))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.DRAW).contains("完整投影"))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.HITBOX).contains("旧 worker 100 槽已闭合"))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.HITBOX).contains("全实体集合映射/生命周期未唯一化"))
+        assertEquals("模拟飞行", controlFeatureTitle(ControlFeature.FAKE_FLIGHT))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.FAKE_FLIGHT).contains("档案未就绪"))
     }
 
     @Test
     fun implementedFeaturesReportTheirOwnProfileReadiness() {
-        val state = RootRuntimeState(
-            status = RootConnectionStatus.READY,
+        val state = ControlRuntimeState(
+            status = ControlConnectionStatus.READY,
             uid = 10001,
             targetPid = 42,
             targetUid = 10001,
             targetStartTimeTicks = "start-42",
-            readOnlyFields = RootReadOnlyFieldsState(
-                profileStatus = RootReadOnlyFieldProfileStatus.INCOMPLETE_EVIDENCE,
+            readOnlyFields = ControlReadOnlyFieldsState(
+                profileStatus = ControlReadOnlyFieldProfileStatus.INCOMPLETE_EVIDENCE,
                 profileSummary = "字段证据未闭合",
             ),
-            injection = RootInjectionState(
-                profileStatus = RootInjectionProfileStatus.FINGERPRINT_MISMATCH,
+            injection = ControlInjectionState(
+                profileStatus = ControlInjectionProfileStatus.FINGERPRINT_MISMATCH,
                 profileSummary = "模块版本不匹配",
             ),
         )
 
         assertEquals(
             "字段档案未就绪：字段证据未闭合",
-            controlFeatureSubtitle(state, RootFeature.READABLE_DATA),
+            controlFeatureSubtitle(state, ControlFeature.READABLE_DATA),
         )
         assertEquals(
             "飞行档案未就绪：模块版本不匹配",
-            controlFeatureSubtitle(state, RootFeature.FLIGHT),
+            controlFeatureSubtitle(state, ControlFeature.FLIGHT),
         )
         assertEquals(
             "模拟飞行档案未就绪：模块版本不匹配",
-            controlFeatureSubtitle(state, RootFeature.FAKE_FLIGHT),
+            controlFeatureSubtitle(state, ControlFeature.FAKE_FLIGHT),
         )
     }
 
     @Test
     fun runtimePreconditionFailureKeepsRetryAvailable() {
-        val state = RootRuntimeState(
-            status = RootConnectionStatus.READY,
+        val state = ControlRuntimeState(
+            status = ControlConnectionStatus.READY,
             uid = 10001,
             targetPid = 42,
             targetUid = 10001,
             targetStartTimeTicks = "start-42",
             supportedFeatures = setOf(
-                RootFeature.FLIGHT,
-                RootFeature.FAKE_FLIGHT,
-                RootFeature.PLAYER_TELEPORT,
+                ControlFeature.FLIGHT,
+                ControlFeature.FAKE_FLIGHT,
+                ControlFeature.PLAYER_TELEPORT,
             ),
-            injection = RootInjectionState(
-                profileStatus = RootInjectionProfileStatus.READY,
-                lastApplyStatus = RootInjectionApplyStatus.PRECONDITION_READ_FAILED,
-                lastFeature = RootFeature.FLIGHT,
+            injection = ControlInjectionState(
+                profileStatus = ControlInjectionProfileStatus.READY,
+                lastApplyStatus = ControlInjectionApplyStatus.PRECONDITION_READ_FAILED,
+                lastFeature = ControlFeature.FLIGHT,
                 message = "pointer step 0 is null",
             ),
         )
 
-        assertTrue(controlFeatureControlEnabled(state, RootFeature.FLIGHT))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.FLIGHT).contains("pointer step 0 is null"))
-        assertTrue(controlFeatureControlEnabled(state, RootFeature.FAKE_FLIGHT))
-        assertTrue(controlFeatureSubtitle(state, RootFeature.FAKE_FLIGHT).contains("执行段补丁档案已载入"))
-        assertTrue(controlFeatureControlEnabled(state, RootFeature.PLAYER_TELEPORT))
+        assertTrue(controlFeatureControlEnabled(state, ControlFeature.FLIGHT))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.FLIGHT).contains("pointer step 0 is null"))
+        assertTrue(controlFeatureControlEnabled(state, ControlFeature.FAKE_FLIGHT))
+        assertTrue(controlFeatureSubtitle(state, ControlFeature.FAKE_FLIGHT).contains("执行段补丁档案已载入"))
+        assertTrue(controlFeatureControlEnabled(state, ControlFeature.PLAYER_TELEPORT))
     }
 
     @Test
@@ -144,14 +144,14 @@ class MinixAppTest {
 
     @Test
     fun searchIdControlRequiresReadyPinnedMemorySessionAndValidInput() {
-        val ready = RootRuntimeState(
-            status = RootConnectionStatus.READY,
+        val ready = ControlRuntimeState(
+            status = ControlConnectionStatus.READY,
             uid = 10001,
             targetPid = 42,
             targetUid = 10001,
             targetStartTimeTicks = "start-42",
-            nativeProbe = RootNativeProbeState(
-                status = RootNativeProbeStatus.OK,
+            nativeProbe = ControlNativeProbeState(
+                status = ControlNativeProbeStatus.OK,
                 processStartTimeTicks = "start-42",
                 memoryReadableModuleCount = 1,
                 memoryReadBytes = 64,
@@ -161,8 +161,8 @@ class MinixAppTest {
         assertTrue(searchIdControlEnabled(ready, 123L))
         assertFalse(searchIdControlEnabled(ready, null))
         assertFalse(searchIdControlEnabled(ready.copy(targetUid = 10002), 123L))
-        assertFalse(searchIdControlEnabled(ready.copy(nativeProbe = RootNativeProbeState()), 123L))
-        assertFalse(searchIdControlEnabled(ready.copy(status = RootConnectionStatus.ERROR), 123L))
+        assertFalse(searchIdControlEnabled(ready.copy(nativeProbe = ControlNativeProbeState()), 123L))
+        assertFalse(searchIdControlEnabled(ready.copy(status = ControlConnectionStatus.ERROR), 123L))
     }
 
     @Test
@@ -170,8 +170,8 @@ class MinixAppTest {
         assertEquals(
             "已命中 · ID 77 · 槽位 7/40",
             searchIdResultLabel(
-                RootSearchIdResult(
-                    status = RootSearchIdStatus.MATCH,
+                ControlSearchIdResult(
+                    status = ControlSearchIdStatus.MATCH,
                     requestedId = 77L,
                     slotIndex = 6,
                 ),
@@ -180,8 +180,8 @@ class MinixAppTest {
         assertEquals(
             "未命中 · ID 88 · 已扫描 40 槽",
             searchIdResultLabel(
-                RootSearchIdResult(
-                    status = RootSearchIdStatus.NOT_FOUND,
+                ControlSearchIdResult(
+                    status = ControlSearchIdStatus.NOT_FOUND,
                     requestedId = 88L,
                 ),
             ),
@@ -189,10 +189,10 @@ class MinixAppTest {
         assertEquals(
             "扫描失败 · TARGET_CHANGED",
             searchIdResultLabel(
-                RootSearchIdResult(
-                    status = RootSearchIdStatus.INVALID,
+                ControlSearchIdResult(
+                    status = ControlSearchIdStatus.INVALID,
                     requestedId = 99L,
-                    invalidReason = RootSearchIdInvalidReason.TARGET_CHANGED,
+                    invalidReason = ControlSearchIdInvalidReason.TARGET_CHANGED,
                 ),
             ),
         )

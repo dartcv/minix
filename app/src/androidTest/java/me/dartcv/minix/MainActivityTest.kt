@@ -26,7 +26,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun rootControlRequiresAnExplicitUserAction() {
+    fun controlRequiresAnExplicitUserAction() {
         composeRule.onNodeWithText("同 UID 控制").assertIsDisplayed()
         composeRule.onNodeWithText("未连接").assertIsDisplayed()
 

@@ -30,17 +30,16 @@ import me.dartcv.minix.core.serialization.CodecResult
 import me.dartcv.minix.core.serialization.LocalDataCodec
 import me.dartcv.minix.core.storage.SettingsRepository
 import me.dartcv.minix.overlay.OverlayController
-import me.dartcv.minix.root.RootConnectionStatus
-import me.dartcv.minix.root.RootFeature
-import me.dartcv.minix.root.RootPlayerPositionRequest
-import me.dartcv.minix.root.RootRuntimeState
-import me.dartcv.minix.root.RootTargetChannel
+import me.dartcv.minix.control.ControlConnectionStatus
+import me.dartcv.minix.control.ControlFeature
+import me.dartcv.minix.control.ControlPlayerPositionRequest
+import me.dartcv.minix.control.ControlRuntimeState
+import me.dartcv.minix.control.ControlTargetChannel
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val previewRuntime = PreviewRuntime()
-    // The implementation remains in the historical `root` package for Binder/AIDL
-    // compatibility.  UI-facing code uses the neutral control-service name.
+    // UI-facing code talks to the certificate/shared-UID control service.
     private val controlController = (application as MinixApplication).controlController
     private val permissions = MutableStateFlow(PermissionSnapshot())
     private val destination = MutableStateFlow(AppDestination.HOME)
@@ -79,7 +78,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         },
         localContent,
         controlController.state,
-    ) { (settings, overlay), (permission, selected, runtime), (presets, mapPoints), rootState ->
+    ) { (settings, overlay), (permission, selected, runtime), (presets, mapPoints), controlState ->
         MainUiState(
             destination = selected,
             settings = settings,
@@ -89,7 +88,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             presets = presets,
             mapPoints = mapPoints,
             favoriteEntryIds = settings.favoriteEntryIds,
-            rootState = rootState,
+            controlState = controlState,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -119,7 +118,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         previewRuntime.record(controlController.state.value.message)
     }
 
-    fun selectControlTarget(value: RootTargetChannel) {
+    fun selectControlTarget(value: ControlTargetChannel) {
         viewModelScope.launch {
             controlController.selectTarget(value)
             previewRuntime.record(controlController.state.value.message)
@@ -138,12 +137,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun armAntiFlashForLaunch(): String? = controlController.armAntiFlashForLaunch()
 
-    fun setControlFeatureEnabled(feature: RootFeature, enabled: Boolean) = viewModelScope.launch {
+    fun setControlFeatureEnabled(feature: ControlFeature, enabled: Boolean) = viewModelScope.launch {
         controlController.setFeatureEnabled(feature, enabled)
         previewRuntime.record(controlController.state.value.message)
     }
 
-    fun setPlayerPosition(request: RootPlayerPositionRequest) = viewModelScope.launch {
+    fun setPlayerPosition(request: ControlPlayerPositionRequest) = viewModelScope.launch {
         controlController.setPlayerPosition(request)
         previewRuntime.record(controlController.state.value.message)
     }
@@ -385,19 +384,19 @@ private enum class ControlPollingMode(val intervalMillis: Long) {
     TARGET_REFRESH(CONTROL_TARGET_REFRESH_INTERVAL_MILLIS),
 }
 
-private fun RootRuntimeState.controlPollingMode(): ControlPollingMode = when {
-    status != RootConnectionStatus.READY -> ControlPollingMode.INACTIVE
+private fun ControlRuntimeState.controlPollingMode(): ControlPollingMode = when {
+    status != ControlConnectionStatus.READY -> ControlPollingMode.INACTIVE
     antiFlashArmed && !antiFlash.workerRunning -> ControlPollingMode.ANTI_FLASH_STARTUP
     antiFlashArmed -> ControlPollingMode.ANTI_FLASH_RUNNING
     hasVerifiedTargetIdentity -> ControlPollingMode.TARGET_REFRESH
     else -> ControlPollingMode.INACTIVE
 }
 
-internal suspend fun Flow<RootRuntimeState>.runControlPolling(
+internal suspend fun Flow<ControlRuntimeState>.runControlPolling(
     maintainAntiFlash: suspend () -> Unit,
     refreshTargetState: suspend () -> Unit,
 ) {
-    map(RootRuntimeState::controlPollingMode)
+    map(ControlRuntimeState::controlPollingMode)
         .distinctUntilChanged()
         .collectLatest { mode ->
             if (mode == ControlPollingMode.INACTIVE) return@collectLatest

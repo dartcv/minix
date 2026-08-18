@@ -1,7 +1,7 @@
 package me.dartcv.minix.core.model
 
-import me.dartcv.minix.root.RootRuntimeState
-import me.dartcv.minix.root.RootReadOnlyFieldsState
+import me.dartcv.minix.control.ControlRuntimeState
+import me.dartcv.minix.control.ControlReadOnlyFieldsState
 
 enum class AppDestination(val label: String) {
     HOME("主页"),
@@ -200,8 +200,8 @@ data class MainUiState(
     val presets: List<Preset> = BuiltInPresets.all,
     val mapPoints: List<MapPoint> = DefaultMapPoints.all,
     val favoriteEntryIds: Set<String> = emptySet(),
-    val rootState: RootRuntimeState = RootRuntimeState(),
+    val controlState: ControlRuntimeState = ControlRuntimeState(),
 ) {
-    val readOnlyFields: RootReadOnlyFieldsState
-        get() = rootState.readOnlyFields
+    val readOnlyFields: ControlReadOnlyFieldsState
+        get() = controlState.readOnlyFields
 }

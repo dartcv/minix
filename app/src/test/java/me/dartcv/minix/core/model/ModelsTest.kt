@@ -1,8 +1,8 @@
 package me.dartcv.minix.core.model
 
-import me.dartcv.minix.root.RootReadOnlyFieldProfileStatus
-import me.dartcv.minix.root.RootReadOnlyFieldsState
-import me.dartcv.minix.root.RootRuntimeState
+import me.dartcv.minix.control.ControlReadOnlyFieldProfileStatus
+import me.dartcv.minix.control.ControlReadOnlyFieldsState
+import me.dartcv.minix.control.ControlRuntimeState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -60,13 +60,13 @@ class ModelsTest {
     }
 
     @Test
-    fun mainUiStateProjectsTypedReadOnlyFieldsFromRootState() {
-        val fields = RootReadOnlyFieldsState(
-            profileStatus = RootReadOnlyFieldProfileStatus.READY,
+    fun mainUiStateProjectsTypedReadOnlyFieldsFromControlState() {
+        val fields = ControlReadOnlyFieldsState(
+            profileStatus = ControlReadOnlyFieldProfileStatus.READY,
             profileSummary = "ready",
         )
         val state = MainUiState(
-            rootState = RootRuntimeState(readOnlyFields = fields),
+            controlState = ControlRuntimeState(readOnlyFields = fields),
         )
 
         assertEquals(fields, state.readOnlyFields)

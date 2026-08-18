@@ -112,9 +112,9 @@ class OverlayService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    override fun onTaskRemoved(rootIntent: Intent?) {
+    override fun onTaskRemoved(removedTaskIntent: Intent?) {
         stopOverlay()
-        super.onTaskRemoved(rootIntent)
+        super.onTaskRemoved(removedTaskIntent)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

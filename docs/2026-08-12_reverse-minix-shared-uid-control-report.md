@@ -25,13 +25,15 @@ MINIX 当前采用 Android 正常应用模型：主进程通过显式 `Context.b
 | 输入 ELF | `D:/Projects/bingxi/liblibGameApp.so` |
 | 目标 ABI | `arm64-v8a` |
 | 控制进程 | 普通、非导出 `android.app.Service`，进程名 `:control` |
-| 进程间通信 | 显式组件 `Context.bindService()` + AIDL，协议版本 7 |
+| 进程间通信 | 显式组件 `Context.bindService()` + AIDL；本报告快照协议版本 7（当前实现为 v11） |
 | Android 身份 | 固定证书 + `android:sharedUserId="ca.sailboat.a"` + 同 Linux UID |
 | 目标包可见性 | Manifest `<queries>` 精确列举九包；未声明 `QUERY_ALL_PACKAGES` |
 | 已静态接线 | SearchID、LIFE_STATE、KILL_COUNT、GetDataLong(1)、FLIGHT、PLAYER_TELEPORT |
 | 显式关闭 | FAKE_FLIGHT、AIM、DRAW、HITBOX |
 | 最新静态验收 | Gradle `BUILD SUCCESSFUL`；SO 验证器通过；24 个套件、147 项测试全通过；lint 0 error / 14 warning；debug/release APK v3-only 签名与 zipalign 通过 |
 | 运行时验收 | 真机证书/shared UID、SELinux、dumpable/ptrace、真实 maps、字段和值与写后置条件待验证 |
+
+> **版本说明：** 本报告封存的是 2026-08-12 的静态快照；其中协议 v7 仅用于还原当日证据。当前代码已迁移到 `me.dartcv.minix.control`，AIDL/Service 协议为 v11，现行调用链与验收基线见 [`2026-08-18_架构-Control传输说明-report.md`](2026-08-18_架构-Control传输说明-report.md)。
 
 ## 3. 架构与门禁
 
@@ -62,8 +64,8 @@ flowchart LR
 
 ### 3.2 Binder 与进程身份
 
-- `RootFeatureService.onTransact()` 要求 `Binder.getCallingUid() == Process.myUid()`；
-- 客户端连接后要求服务 UID 等于客户端预期 UID，并验证 AIDL 协议版本 7；
+- `ControlService.onTransact()` 要求 `Binder.getCallingUid() == Process.myUid()`；
+- 客户端连接后要求服务 UID 等于客户端预期 UID，并验证当时快照中的 AIDL 协议版本 7（当前实现为 v11）；
 - `/proc/<pid>/status` 的 `Uid:` 必须恰有一行、恰有四个非负 32 位十进制字段，使用 effective UID；
 - 会话固定包名、PID、effective UID、startTimeTicks；缺失、格式错误、PID 复用或 UID 变化全部失效；
 - native probe 后再次复核，字段读取、SearchID、功能写入和玩家坐标事务的各关键阶段继续复核。
@@ -123,16 +125,16 @@ python tools\verify_gameapp_elf.py `
 
 ### E-002：包证书与 shared UID 身份门禁
 
-- `source_ref`: `app/src/main/java/me/dartcv/minix/root/TargetPackageIdentityVerifier.kt`
+- `source_ref`: `app/src/main/java/me/dartcv/minix/control/TargetPackageIdentityVerifier.kt`
 - `content_hash`: `03ba74a4885c167050b1ea34882e84163281ba8ca81ee85aa16aca31fb5a4547`
-- `linked_source`: `RootFeatureService.kt`, `RootTargetSession.kt`, `TargetPackageIdentityVerifierTest.kt`
+- `linked_source`: `ControlService.kt`, `ControlTargetSession.kt`, `TargetPackageIdentityVerifierTest.kt`
 - `repro_command`:
 
 ```powershell
 Select-String -Path `
-  app\src\main\java\me\dartcv\minix\root\TargetPackageIdentityVerifier.kt, `
-  app\src\main\java\me\dartcv\minix\root\RootFeatureService.kt, `
-  app\src\main\java\me\dartcv\minix\root\RootTargetSession.kt `
+  app\src\main\java\me\dartcv\minix\control\TargetPackageIdentityVerifier.kt, `
+  app\src\main\java\me\dartcv\minix\control\ControlService.kt, `
+  app\src\main\java\me\dartcv\minix\control\ControlTargetSession.kt `
   -Pattern 'SIGNER_SHA256|SHARED_USER_ID|packageIdentityVerifier|expectedUid'
 ```
 
@@ -146,28 +148,28 @@ Select-String -Path `
 
 ```powershell
 Select-String -Path app\src\main\AndroidManifest.xml `
-  -Pattern 'sharedUserId|<queries>|<package|RootFeatureService|exported|:control|QUERY_ALL_PACKAGES'
+  -Pattern 'sharedUserId|<queries>|<package|ControlService|exported|:control|QUERY_ALL_PACKAGES'
 ```
 
 - `result`: `sharedUserId="ca.sailboat.a"`；控制 Service 为 `exported=false`、`:control`；`<queries>` 精确列九包；未声明 `QUERY_ALL_PACKAGES`。
 
 ### E-004：UID 四元身份与 Binder 门禁
 
-- `source_ref`: `RootTargetSession.kt`, `RootFeatureService.kt`, `RootFeatureBridgeClient.kt`, `IRootFeatureBridge.aidl`
+- `source_ref`: `ControlTargetSession.kt`, `ControlService.kt`, `ControlBridgeClient.kt`, `IControlBridge.aidl`
 - `content_hash`: 以当前源码及统一验收产物为准
 - `repro_command`:
 
 ```powershell
-Select-String -Path app\src\main\java\me\dartcv\minix\root\*.kt, `
-  app\src\main\aidl\me\dartcv\minix\root\IRootFeatureBridge.aidl `
+Select-String -Path app\src\main\java\me\dartcv\minix\control\*.kt, `
+  app\src\main\aidl\me\dartcv\minix\control\IControlBridge.aidl `
   -Pattern 'Binder.getCallingUid|readEffectiveUid|getTargetUid|startTimeTicks|hasVerifiedTargetIdentity'
 ```
 
-- `result`: Binder caller/service/target 同 UID；包名、PID、effective UID、startTimeTicks 固定并持续复核；AIDL 协议版本 7 暴露 target UID 快照。
+- `result`: Binder caller/service/target 同 UID；包名、PID、effective UID、startTimeTicks 固定并持续复核；当时 AIDL 协议版本 7 暴露 target UID 快照，当前协议已升级到 v11。
 
 ### E-005：功能接线与 unresolved 分流
 
-- `source_ref`: `RootInjection.kt`, `RootReadOnlyFieldProfiles.kt`, `RootGameAppArtifact1582.kt`, `ProcRootSearchIdAnchorResolver.kt`
+- `source_ref`: `ControlInjection.kt`, `ControlReadOnlyFieldProfiles.kt`, `ControlGameAppArtifact1582.kt`, `ProcControlSearchIdAnchorResolver.kt`
 - `supporting_evidence`:
   - [`E-002-fake-flight-patch.md`](../work/minix-gameapp-fingerprint-20260812/evidence/E-002-fake-flight-patch.md), SHA-256 `e59172fd55dfa836d3a689cdf440d4acc0be1450e21ecf9bd5209678fe7e436c`
   - [`E-003-fake-flight-independent.md`](../work/minix-gameapp-fingerprint-20260812/evidence/E-003-fake-flight-independent.md), SHA-256 `255154ea583a7e9a725d179d04a9709cfe63112dd364f647d44f7df956db164e`
@@ -212,7 +214,7 @@ foreach ($apk in $apks) {
 - `status`: `validated_source`
 - `evidence_ids`: `E-002`, `E-003`, `E-004`
 - `confidence`: high
-- `location`: `AndroidManifest.xml`, `RootFeatureService.kt`, `RootFeatureBridgeClient.kt`
+- `location`: `AndroidManifest.xml`, `ControlService.kt`, `ControlBridgeClient.kt`
 - `finding`: 控制服务是应用内非导出 Service，客户端使用显式 bind；它依赖证书、sharedUserId 与系统安装 UID，而不是独立权限提升通道。
 
 ### F-002：目标身份在包层与进程层双重 fail-closed
@@ -221,7 +223,7 @@ foreach ($apk in $apks) {
 - `status`: `validated_source`
 - `evidence_ids`: `E-002`, `E-004`
 - `confidence`: high
-- `location`: `TargetPackageIdentityVerifier.kt`, `RootTargetSession.kt`
+- `location`: `TargetPackageIdentityVerifier.kt`, `ControlTargetSession.kt`
 - `finding`: 包层要求 signer/sharedUserId/安装 UID 精确匹配；进程层固定包名/PID/effective UID/startTimeTicks。任一检查失败会在 native probe 之前或操作期间终止并清空状态。
 
 ### F-003：SO 身份与 BSS 布局已闭合
@@ -230,7 +232,7 @@ foreach ($apk in $apks) {
 - `status`: `validated_static`
 - `evidence_ids`: `E-001`
 - `confidence`: high
-- `location`: `RootGameAppArtifact1582.kt`, `ProcRootSearchIdAnchorResolver.kt`
+- `location`: `ControlGameAppArtifact1582.kt`, `ProcControlSearchIdAnchorResolver.kt`
 - `finding`: 独立解析器已复核完整 SHA、Build-ID、SONAME、PT_LOAD、`.text/.data/.bss` 和派生 BSS 地址；运行时用完整 SHA 绑定 backing file，并验证 maps 结构。
 
 ### F-004：KILL_COUNT 与 SearchID 静态链路已接入
@@ -239,7 +241,7 @@ foreach ($apk in $apks) {
 - `status`: `validated_source`
 - `evidence_ids`: `E-001`, `E-005`
 - `confidence`: high
-- `location`: `RootReadOnlyFieldProfiles.kt`, `RootSearchId.kt`, `ProcRootSearchIdAnchorResolver.kt`
+- `location`: `ControlReadOnlyFieldProfiles.kt`, `ControlSearchId.kt`, `ProcControlSearchIdAnchorResolver.kt`
 - `finding`: `KILL_COUNT` 地址为 `loadBias+0x0a879c78`；SearchID 使用 SHA-bound BSS anchor 与固定 40 槽扫描器。真机字段值仍待核验。
 
 ### F-005：FLIGHT 与 PLAYER_TELEPORT 独立于未闭合功能
@@ -248,7 +250,7 @@ foreach ($apk in $apks) {
 - `status`: `validated_source`
 - `evidence_ids`: `E-005`
 - `confidence`: high
-- `location`: `RootInjection.kt`, `RootTargetSession.kt`
+- `location`: `ControlInjection.kt`, `ControlTargetSession.kt`
 - `finding`: FLIGHT 有独立 recipe 与 `0/8` 值；传送有 X/Y/Z recipe、预读、事务写入、回读与逆序回滚，不依赖 FAKE_FLIGHT 的候选选择。
 
 ### F-006：FAKE_FLIGHT 等功能维持 fail-closed
@@ -257,7 +259,7 @@ foreach ($apk in $apks) {
 - `status`: `unresolved`
 - `evidence_ids`: `E-005`
 - `confidence`: high（对二义与关闭结论）
-- `location`: `RootInjectionProfileCatalog`
+- `location`: `ControlInjectionProfileCatalog`
 - `finding`: FAKE_FLIGHT 尚有两个高相关 RVA，AIM/DRAW/HITBOX 也缺唯一 scalar patch；这些条目不进入 resolved map，调用返回 typed non-success。
 
 ### F-007：最新统一静态验收已通过，真机行为仍是发布门槛
@@ -358,18 +360,18 @@ foreach ($apk in $apks) {
 
 | 对象 | 路径 |
 |---|---|
-| Android 包身份验证器 | `app/src/main/java/me/dartcv/minix/root/TargetPackageIdentityVerifier.kt` |
-| 普通控制 Service | `app/src/main/java/me/dartcv/minix/root/RootFeatureService.kt` |
-| Binder 客户端 | `app/src/main/java/me/dartcv/minix/root/RootFeatureBridgeClient.kt` |
-| 四元身份会话 | `app/src/main/java/me/dartcv/minix/root/RootTargetSession.kt` |
-| AIDL 协议 | `app/src/main/aidl/me/dartcv/minix/root/IRootFeatureBridge.aidl` |
-| GameApp 常量 | `app/src/main/java/me/dartcv/minix/root/RootGameAppArtifact1582.kt` |
-| maps/BSS resolver | `app/src/main/java/me/dartcv/minix/root/ProcRootSearchIdAnchorResolver.kt` |
-| SearchID | `app/src/main/java/me/dartcv/minix/root/RootSearchId.kt` |
-| 字段档案 | `app/src/main/java/me/dartcv/minix/root/RootReadOnlyFieldProfiles.kt` |
-| 注入档案 | `app/src/main/java/me/dartcv/minix/root/RootInjection.kt` |
+| Android 包身份验证器 | `app/src/main/java/me/dartcv/minix/control/TargetPackageIdentityVerifier.kt` |
+| 普通控制 Service | `app/src/main/java/me/dartcv/minix/control/ControlService.kt` |
+| Binder 客户端 | `app/src/main/java/me/dartcv/minix/control/ControlBridgeClient.kt` |
+| 四元身份会话 | `app/src/main/java/me/dartcv/minix/control/ControlTargetSession.kt` |
+| AIDL 协议 | `app/src/main/aidl/me/dartcv/minix/control/IControlBridge.aidl` |
+| GameApp 常量 | `app/src/main/java/me/dartcv/minix/control/ControlGameAppArtifact1582.kt` |
+| maps/BSS resolver | `app/src/main/java/me/dartcv/minix/control/ProcControlSearchIdAnchorResolver.kt` |
+| SearchID | `app/src/main/java/me/dartcv/minix/control/ControlSearchId.kt` |
+| 字段档案 | `app/src/main/java/me/dartcv/minix/control/ControlReadOnlyFieldProfiles.kt` |
+| 注入档案 | `app/src/main/java/me/dartcv/minix/control/ControlInjection.kt` |
 | ELF 身份 | `artifacts/liblibGameApp-1.58.2-elf-identity.json` |
 | ELF 验证报告 | `artifacts/liblibGameApp-1.58.2-elf-verification.json` |
 | ELF 验证器 | `tools/verify_gameapp_elf.py` |
 
-历史 `Root*` 类名只是现有源码内部命名。本报告所述当前执行模型以 Manifest、Service、Binder、证书、sharedUserId 和 Linux UID 的实际实现为准。
+本报告记录的执行模型以当时 Manifest、Service、Binder、证书、sharedUserId 和 Linux UID 证据为准；现行实现统一使用 `me.dartcv.minix.control`、Control 命名和 AIDL v11，更新后的组件索引见架构说明。

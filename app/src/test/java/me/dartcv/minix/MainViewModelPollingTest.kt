@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import me.dartcv.minix.root.RootAntiFlashState
-import me.dartcv.minix.root.RootAntiFlashStatus
-import me.dartcv.minix.root.RootConnectionStatus
-import me.dartcv.minix.root.RootRuntimeState
+import me.dartcv.minix.control.ControlAntiFlashState
+import me.dartcv.minix.control.ControlAntiFlashStatus
+import me.dartcv.minix.control.ControlConnectionStatus
+import me.dartcv.minix.control.ControlRuntimeState
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -18,8 +18,8 @@ class MainViewModelPollingTest {
     @Test
     fun armingInterruptsSlowPollingAndRunsStartupMaintenanceImmediately() = runTest {
         val states = MutableStateFlow(
-            RootRuntimeState(
-                status = RootConnectionStatus.READY,
+            ControlRuntimeState(
+                status = ControlConnectionStatus.READY,
                 uid = 123,
                 targetPid = 456,
                 targetUid = 123,
@@ -40,8 +40,8 @@ class MainViewModelPollingTest {
         advanceTimeBy(500)
         states.value = states.value.copy(
             antiFlashArmed = true,
-            antiFlash = RootAntiFlashState(
-                status = RootAntiFlashStatus.WAITING_FOR_TARGET,
+            antiFlash = ControlAntiFlashState(
+                status = ControlAntiFlashStatus.WAITING_FOR_TARGET,
                 requestedEnabled = true,
             ),
         )

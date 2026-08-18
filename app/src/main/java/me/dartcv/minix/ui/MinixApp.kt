@@ -122,24 +122,24 @@ import me.dartcv.minix.core.model.LocalEntry
 import me.dartcv.minix.core.model.MainUiState
 import me.dartcv.minix.core.model.MapPoint
 import me.dartcv.minix.core.model.OverlaySessionState
-import me.dartcv.minix.root.RootConnectionStatus
-import me.dartcv.minix.root.RootAntiFlashStatus
-import me.dartcv.minix.root.RootFeature
-import me.dartcv.minix.root.RootInjectionApplyStatus
-import me.dartcv.minix.root.RootInjectionProfileStatus
-import me.dartcv.minix.root.RootInjectionState
-import me.dartcv.minix.root.RootInt32FieldState
-import me.dartcv.minix.root.RootInt64FieldState
-import me.dartcv.minix.root.RootNativeProbeStatus
-import me.dartcv.minix.root.RootPlayerPositionRequest
-import me.dartcv.minix.root.RootReadOnlyFieldProfileStatus
-import me.dartcv.minix.root.RootReadOnlyFieldReadStatus
-import me.dartcv.minix.root.RootRuntimeState
-import me.dartcv.minix.root.RootSearchIdResult
-import me.dartcv.minix.root.RootSearchIdStatus
-import me.dartcv.minix.root.RootTargetCatalog
-import me.dartcv.minix.root.RootTargetChannel
-import me.dartcv.minix.root.hasBlockingRuntimeFailureFor
+import me.dartcv.minix.control.ControlConnectionStatus
+import me.dartcv.minix.control.ControlAntiFlashStatus
+import me.dartcv.minix.control.ControlFeature
+import me.dartcv.minix.control.ControlInjectionApplyStatus
+import me.dartcv.minix.control.ControlInjectionProfileStatus
+import me.dartcv.minix.control.ControlInjectionState
+import me.dartcv.minix.control.ControlInt32FieldState
+import me.dartcv.minix.control.ControlInt64FieldState
+import me.dartcv.minix.control.ControlNativeProbeStatus
+import me.dartcv.minix.control.ControlPlayerPositionRequest
+import me.dartcv.minix.control.ControlReadOnlyFieldProfileStatus
+import me.dartcv.minix.control.ControlReadOnlyFieldReadStatus
+import me.dartcv.minix.control.ControlRuntimeState
+import me.dartcv.minix.control.ControlSearchIdResult
+import me.dartcv.minix.control.ControlSearchIdStatus
+import me.dartcv.minix.control.ControlTargetCatalog
+import me.dartcv.minix.control.ControlTargetChannel
+import me.dartcv.minix.control.hasBlockingRuntimeFailureFor
 import me.dartcv.minix.ui.theme.Coral
 import me.dartcv.minix.ui.theme.Ink
 import me.dartcv.minix.ui.theme.Mint
@@ -575,31 +575,31 @@ private fun OverlayStatusPill(state: OverlaySessionState) {
     }
 }
 
-private fun RootConnectionStatus.displayLabel(): String = when (this) {
-    RootConnectionStatus.IDLE -> "未连接"
-    RootConnectionStatus.REQUESTING -> "绑定中"
-    RootConnectionStatus.CONNECTING -> "连接中"
-    RootConnectionStatus.READY -> "已连接"
-    RootConnectionStatus.UNAVAILABLE -> "不可用"
-    RootConnectionStatus.DENIED -> "身份拒绝"
-    RootConnectionStatus.ERROR -> "异常"
+private fun ControlConnectionStatus.displayLabel(): String = when (this) {
+    ControlConnectionStatus.IDLE -> "未连接"
+    ControlConnectionStatus.REQUESTING -> "绑定中"
+    ControlConnectionStatus.CONNECTING -> "连接中"
+    ControlConnectionStatus.READY -> "已连接"
+    ControlConnectionStatus.UNAVAILABLE -> "不可用"
+    ControlConnectionStatus.DENIED -> "身份拒绝"
+    ControlConnectionStatus.ERROR -> "异常"
 }
 
-private fun RootAntiFlashStatus.displayLabel(): String = when (this) {
-    RootAntiFlashStatus.IDLE -> "未启动"
-    RootAntiFlashStatus.STARTING -> "启动中"
-    RootAntiFlashStatus.WAITING_FOR_TARGET -> "预检中"
-    RootAntiFlashStatus.PREFLIGHT_FAILED -> "预检失败"
-    RootAntiFlashStatus.RUNNING -> "运行中"
-    RootAntiFlashStatus.STOPPING -> "停止中"
-    RootAntiFlashStatus.STOPPED -> "已停止"
-    RootAntiFlashStatus.TARGET_CHANGED -> "目标已变化"
-    RootAntiFlashStatus.PROFILE_MISMATCH -> "指纹不匹配"
-    RootAntiFlashStatus.READ_FAILED -> "读取失败"
-    RootAntiFlashStatus.WRITE_FAILED -> "写入失败"
-    RootAntiFlashStatus.VERIFY_FAILED -> "回读失败"
-    RootAntiFlashStatus.ROLLBACK_FAILED -> "回滚失败"
-    RootAntiFlashStatus.BACKEND_UNAVAILABLE -> "后端不可用"
+private fun ControlAntiFlashStatus.displayLabel(): String = when (this) {
+    ControlAntiFlashStatus.IDLE -> "未启动"
+    ControlAntiFlashStatus.STARTING -> "启动中"
+    ControlAntiFlashStatus.WAITING_FOR_TARGET -> "预检中"
+    ControlAntiFlashStatus.PREFLIGHT_FAILED -> "预检失败"
+    ControlAntiFlashStatus.RUNNING -> "运行中"
+    ControlAntiFlashStatus.STOPPING -> "停止中"
+    ControlAntiFlashStatus.STOPPED -> "已停止"
+    ControlAntiFlashStatus.TARGET_CHANGED -> "目标已变化"
+    ControlAntiFlashStatus.PROFILE_MISMATCH -> "指纹不匹配"
+    ControlAntiFlashStatus.READ_FAILED -> "读取失败"
+    ControlAntiFlashStatus.WRITE_FAILED -> "写入失败"
+    ControlAntiFlashStatus.VERIFY_FAILED -> "回读失败"
+    ControlAntiFlashStatus.ROLLBACK_FAILED -> "回滚失败"
+    ControlAntiFlashStatus.BACKEND_UNAVAILABLE -> "后端不可用"
 }
 
 internal fun antiFlashLaunchButtonLabel(
@@ -615,7 +615,7 @@ internal fun antiFlashLaunchButtonLabel(
 private fun PermissionSummary(uiState: MainUiState) {
     val overlayReady = uiState.permissions.canDrawOverlays
     val notificationReady = uiState.permissions.notificationGranted
-    val rootReady = uiState.rootState.status == RootConnectionStatus.READY
+    val controlReady = uiState.controlState.status == ControlConnectionStatus.READY
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -627,7 +627,7 @@ private fun PermissionSummary(uiState: MainUiState) {
         ) {
             PermissionLine("悬浮窗口", overlayReady)
             PermissionLine("前台通知", notificationReady)
-            PermissionLine("同 UID 控制", rootReady, uiState.rootState.status.displayLabel())
+            PermissionLine("同 UID 控制", controlReady, uiState.controlState.status.displayLabel())
         }
     }
 }
@@ -657,10 +657,10 @@ private fun ControlTargetPanel(
     uiState: MainUiState,
     actions: MinixActions,
 ) {
-    val root = uiState.rootState
-    val ready = root.status == RootConnectionStatus.READY
-    val busy = root.status == RootConnectionStatus.REQUESTING ||
-        root.status == RootConnectionStatus.CONNECTING
+    val controlState = uiState.controlState
+    val ready = controlState.status == ControlConnectionStatus.READY
+    val busy = controlState.status == ControlConnectionStatus.REQUESTING ||
+        controlState.status == ControlConnectionStatus.CONNECTING
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -679,7 +679,7 @@ private fun ControlTargetPanel(
                 Column(modifier = Modifier.weight(1f)) {
                     Text("本地目标会话", fontWeight = FontWeight.Bold)
                     Text(
-                        text = root.message,
+                        text = controlState.message,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         maxLines = 2,
@@ -687,14 +687,14 @@ private fun ControlTargetPanel(
                     )
                 }
                 Text(
-                    text = root.status.displayLabel(),
+                    text = controlState.status.displayLabel(),
                     color = if (ready) Mint else Coral,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
                 )
             }
             ControlTargetSelector(
-                selectedPackage = root.targetPackage,
+                selectedPackage = controlState.targetPackage,
                 onSelected = actions.onControlTargetSelected,
             )
             Row(
@@ -704,7 +704,7 @@ private fun ControlTargetPanel(
             ) {
                 Button(
                     onClick = if (ready) actions.onRefreshControlTarget else actions.onConnectControlService,
-                    enabled = !busy && (!ready || root.targetPackage.isNotBlank()),
+                    enabled = !busy && (!ready || controlState.targetPackage.isNotBlank()),
                     modifier = Modifier.weight(1f),
                 ) {
                     Icon(
@@ -725,37 +725,37 @@ private fun ControlTargetPanel(
             }
             Button(
                 onClick = actions.onLaunchGameWithAntiFlash,
-                enabled = ready && root.targetPackage.isNotBlank(),
+                enabled = ready && controlState.targetPackage.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(Icons.Outlined.PlayArrow, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     antiFlashLaunchButtonLabel(
-                        armed = root.antiFlashArmed,
-                        workerRunning = root.antiFlash.workerRunning,
+                        armed = controlState.antiFlashArmed,
+                        workerRunning = controlState.antiFlash.workerRunning,
                     ),
                 )
             }
-            if (root.targetSummary.isNotBlank()) {
+            if (controlState.targetSummary.isNotBlank()) {
                 Text(
-                    text = root.targetSummary,
+                    text = controlState.targetSummary,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
                 )
             }
-            if (root.nativeProbe.status != RootNativeProbeStatus.IDLE) {
+            if (controlState.nativeProbe.status != ControlNativeProbeStatus.IDLE) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
-                    text = "Native 只读后端 · ${root.nativeProbe.summary}",
-                    color = if (root.nativeProbe.isMemoryReady) Mint else Coral,
+                    text = "Native 只读后端 · ${controlState.nativeProbe.summary}",
+                    color = if (controlState.nativeProbe.isMemoryReady) Mint else Coral,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
                 )
-                if (root.nativeProbe.modules.isNotEmpty()) {
+                if (controlState.nativeProbe.modules.isNotEmpty()) {
                     Text(
-                        text = "读回模块：${root.nativeProbe.modules.take(3).joinToString()}",
+                        text = "读回模块：${controlState.nativeProbe.modules.take(3).joinToString()}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         maxLines = 2,
@@ -763,26 +763,26 @@ private fun ControlTargetPanel(
                     )
                 }
             }
-            if (root.injection.profileStatus != RootInjectionProfileStatus.IDLE ||
-                root.injection.lastApplyStatus != RootInjectionApplyStatus.IDLE
+            if (controlState.injection.profileStatus != ControlInjectionProfileStatus.IDLE ||
+                controlState.injection.lastApplyStatus != ControlInjectionApplyStatus.IDLE
             ) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
-                    text = "注入门禁 · ${root.injection.profileStatus.displayLabel()}",
-                    color = if (root.injection.isProfileReady) Mint else Coral,
+                    text = "注入门禁 · ${controlState.injection.profileStatus.displayLabel()}",
+                    color = if (controlState.injection.isProfileReady) Mint else Coral,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = buildString {
-                        append(root.injection.profileSummary)
-                        if (root.injection.profileId.isNotBlank()) {
+                        append(controlState.injection.profileSummary)
+                        if (controlState.injection.profileId.isNotBlank()) {
                             append(" · ")
-                            append(root.injection.profileId)
+                            append(controlState.injection.profileId)
                         }
-                        if (root.injection.requiredAbi.isNotBlank()) {
+                        if (controlState.injection.requiredAbi.isNotBlank()) {
                             append(" · ")
-                            append(root.injection.requiredAbi)
+                            append(controlState.injection.requiredAbi)
                         }
                     },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -790,10 +790,10 @@ private fun ControlTargetPanel(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (root.injection.lastApplyStatus != RootInjectionApplyStatus.IDLE) {
+                if (controlState.injection.lastApplyStatus != ControlInjectionApplyStatus.IDLE) {
                     Text(
-                        text = "最近执行：${root.injection.lastApplyStatus.displayLabel()}" +
-                            root.injection.message.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty(),
+                        text = "最近执行：${controlState.injection.lastApplyStatus.displayLabel()}" +
+                            controlState.injection.message.takeIf(String::isNotBlank)?.let { " · $it" }.orEmpty(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         maxLines = 2,
@@ -801,25 +801,25 @@ private fun ControlTargetPanel(
                     )
                 }
             }
-            if (root.antiFlashArmed || root.antiFlash.status != RootAntiFlashStatus.IDLE) {
+            if (controlState.antiFlashArmed || controlState.antiFlash.status != ControlAntiFlashStatus.IDLE) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
-                    text = "防闪 · ${root.antiFlash.status.displayLabel()}",
-                    color = if (root.antiFlash.workerRunning) Mint else Coral,
+                    text = "防闪 · ${controlState.antiFlash.status.displayLabel()}",
+                    color = if (controlState.antiFlash.workerRunning) Mint else Coral,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = buildString {
                         append("循环 ")
-                        append(root.antiFlash.iterationCount)
+                        append(controlState.antiFlash.iterationCount)
                         append(" · 已验证写入 ")
-                        append(root.antiFlash.successfulWriteCount)
-                        root.antiFlash.targetPid?.let { pid ->
+                        append(controlState.antiFlash.successfulWriteCount)
+                        controlState.antiFlash.targetPid?.let { pid ->
                             append(" · PID ")
                             append(pid)
                         }
-                        root.antiFlash.lastFailureIndex?.let { index ->
+                        controlState.antiFlash.lastFailureIndex?.let { index ->
                             append(" · 失败项 ")
                             append(index)
                         }
@@ -827,9 +827,9 @@ private fun ControlTargetPanel(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                 )
-                if (root.antiFlash.message.isNotBlank()) {
+                if (controlState.antiFlash.message.isNotBlank()) {
                     Text(
-                        text = root.antiFlash.message,
+                        text = controlState.antiFlash.message,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         maxLines = 2,
@@ -845,10 +845,10 @@ private fun ControlTargetPanel(
 @Composable
 private fun ControlTargetSelector(
     selectedPackage: String,
-    onSelected: (RootTargetChannel) -> Unit,
+    onSelected: (ControlTargetChannel) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selected = RootTargetCatalog.fromPackageName(selectedPackage)
+    val selected = ControlTargetCatalog.fromPackageName(selectedPackage)
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
@@ -877,7 +877,7 @@ private fun ControlTargetSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            RootTargetCatalog.entries.forEach { target ->
+            ControlTargetCatalog.entries.forEach { target ->
                 DropdownMenuItem(
                     text = {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -912,25 +912,25 @@ private fun ControlTargetSelector(
     }
 }
 
-private fun RootFeature.icon(): ImageVector = when (this) {
-    RootFeature.AIM -> Icons.Outlined.Sensors
-    RootFeature.DRAW -> Icons.Outlined.GridView
-    RootFeature.FLIGHT -> Icons.Outlined.Map
-    RootFeature.FAKE_FLIGHT -> Icons.Outlined.Map
-    RootFeature.PLAYER_TELEPORT -> Icons.Outlined.Search
-    RootFeature.HITBOX -> Icons.Outlined.Tune
-    RootFeature.ANTI_FLASH -> Icons.Outlined.FlashOff
-    RootFeature.READABLE_DATA -> Icons.Outlined.Info
+private fun ControlFeature.icon(): ImageVector = when (this) {
+    ControlFeature.AIM -> Icons.Outlined.Sensors
+    ControlFeature.DRAW -> Icons.Outlined.GridView
+    ControlFeature.FLIGHT -> Icons.Outlined.Map
+    ControlFeature.FAKE_FLIGHT -> Icons.Outlined.Map
+    ControlFeature.PLAYER_TELEPORT -> Icons.Outlined.Search
+    ControlFeature.HITBOX -> Icons.Outlined.Tune
+    ControlFeature.ANTI_FLASH -> Icons.Outlined.FlashOff
+    ControlFeature.READABLE_DATA -> Icons.Outlined.Info
 }
 
 internal val controlFeatureDisplayOrder = listOf(
-    RootFeature.FLIGHT,
-    RootFeature.FAKE_FLIGHT,
-    RootFeature.ANTI_FLASH,
-    RootFeature.READABLE_DATA,
-    RootFeature.AIM,
-    RootFeature.DRAW,
-    RootFeature.HITBOX,
+    ControlFeature.FLIGHT,
+    ControlFeature.FAKE_FLIGHT,
+    ControlFeature.ANTI_FLASH,
+    ControlFeature.READABLE_DATA,
+    ControlFeature.AIM,
+    ControlFeature.DRAW,
+    ControlFeature.HITBOX,
 )
 
 @Composable
@@ -938,30 +938,30 @@ private fun ControlsScreen(
     uiState: MainUiState,
     actions: MinixActions,
 ) {
-    val rootReady = uiState.rootState.status == RootConnectionStatus.READY
-    val targetReady = rootReady && uiState.rootState.hasVerifiedTargetIdentity
+    val controlReady = uiState.controlState.status == ControlConnectionStatus.READY
+    val targetReady = controlReady && uiState.controlState.hasVerifiedTargetIdentity
     PageColumn(title = "控制面板", subtitle = "同 UID 控制桥与悬浮面板配置") {
         ControlTargetPanel(uiState = uiState, actions = actions)
         SectionTitle("可用功能")
         controlFeatureDisplayOrder.forEach { feature ->
-            if (feature == RootFeature.AIM) {
+            if (feature == ControlFeature.AIM) {
                 PlayerPositionPanel(uiState = uiState, actions = actions)
                 SearchIdPanel(uiState = uiState, actions = actions)
                 ReadOnlyFieldsPanel(uiState)
                 SectionTitle("待闭合功能")
             }
-            val checked = if (feature == RootFeature.ANTI_FLASH) {
-                uiState.rootState.antiFlashArmed
+            val checked = if (feature == ControlFeature.ANTI_FLASH) {
+                uiState.controlState.antiFlashArmed
             } else {
-                uiState.rootState.features[feature] == true
+                uiState.controlState.features[feature] == true
             }
             ToggleSetting(
                 icon = feature.icon(),
                 title = controlFeatureTitle(feature),
-                subtitle = controlFeatureSubtitle(uiState.rootState, feature),
+                subtitle = controlFeatureSubtitle(uiState.controlState, feature),
                 checked = checked,
                 enabled = controlFeatureControlEnabled(
-                    rootState = uiState.rootState,
+                    controlState = uiState.controlState,
                     feature = feature,
                 ),
                 onCheckedChange = { enabled -> actions.onControlFeatureChanged(feature, enabled) },
@@ -1038,80 +1038,80 @@ private fun ControlsScreen(
     }
 }
 
-internal fun controlFeatureTitle(feature: RootFeature): String = when (feature) {
-    RootFeature.AIM,
-    RootFeature.DRAW,
-    RootFeature.HITBOX,
+internal fun controlFeatureTitle(feature: ControlFeature): String = when (feature) {
+    ControlFeature.AIM,
+    ControlFeature.DRAW,
+    ControlFeature.HITBOX,
     -> "${feature.label} · 未实现"
 
     else -> feature.label
 }
 
 internal fun controlFeatureControlEnabled(
-    rootState: RootRuntimeState,
-    feature: RootFeature,
+    controlState: ControlRuntimeState,
+    feature: ControlFeature,
 ): Boolean {
-    val rootReady = rootState.status == RootConnectionStatus.READY
-    if (feature == RootFeature.ANTI_FLASH) {
-        return rootReady && rootState.targetPackage.isNotBlank()
+    val controlReady = controlState.status == ControlConnectionStatus.READY
+    if (feature == ControlFeature.ANTI_FLASH) {
+        return controlReady && controlState.targetPackage.isNotBlank()
     }
-    val targetReady = rootReady && rootState.hasVerifiedTargetIdentity
-    if (!targetReady || feature !in rootState.supportedFeatures) return false
+    val targetReady = controlReady && controlState.hasVerifiedTargetIdentity
+    if (!targetReady || feature !in controlState.supportedFeatures) return false
     return true
 }
 
 internal fun controlFeatureSubtitle(
-    rootState: RootRuntimeState,
-    feature: RootFeature,
+    controlState: ControlRuntimeState,
+    feature: ControlFeature,
 ): String {
-    val rootReady = rootState.status == RootConnectionStatus.READY
-    val targetReady = rootReady && rootState.hasVerifiedTargetIdentity
-    val supported = feature in rootState.supportedFeatures
+    val controlReady = controlState.status == ControlConnectionStatus.READY
+    val targetReady = controlReady && controlState.hasVerifiedTargetIdentity
+    val supported = feature in controlState.supportedFeatures
     return when (feature) {
-        RootFeature.AIM -> "40 槽候选与过滤已恢复；最终瞄准 writer、宽度和值尚未闭合"
-        RootFeature.DRAW -> "实体/矩阵/九字段协议已恢复；完整投影、字段映射和循环边界尚未闭合"
-        RootFeature.FAKE_FLIGHT -> when {
+        ControlFeature.AIM -> "40 槽候选与过滤已恢复；最终瞄准 writer、宽度和值尚未闭合"
+        ControlFeature.DRAW -> "实体/矩阵/九字段协议已恢复；完整投影、字段映射和循环边界尚未闭合"
+        ControlFeature.FAKE_FLIGHT -> when {
             !targetReady -> "连接控制服务并打开目标进程后启用"
-            rootState.injection.hasBlockingRuntimeFailureFor(feature) ->
-                "上次运行时校验未通过：${rootState.injection.runtimeFailureDetail()}；当前可直接重试"
+            controlState.injection.hasBlockingRuntimeFailureFor(feature) ->
+                "上次运行时校验未通过：${controlState.injection.runtimeFailureDetail()}；当前可直接重试"
             supported -> "执行段补丁档案已载入；开启与关闭均校验预期指令并回读"
-            else -> "模拟飞行档案未就绪：${rootState.injection.profileSummary}"
+            else -> "模拟飞行档案未就绪：${controlState.injection.profileSummary}"
         }
-        RootFeature.HITBOX -> "旧 worker 100 槽已闭合，但当前 exact-SHA 全实体集合映射/生命周期未唯一化"
-        RootFeature.ANTI_FLASH -> when {
-            !rootReady -> "连接本地控制服务后可预置；游戏启动后自动接管"
+        ControlFeature.HITBOX -> "旧 worker 100 槽已闭合，但当前 exact-SHA 全实体集合映射/生命周期未唯一化"
+        ControlFeature.ANTI_FLASH -> when {
+            !controlReady -> "连接本地控制服务后可预置；游戏启动后自动接管"
             supported -> "双模块指纹已验证，22 ms 循环写入并逐项回读"
-            rootState.antiFlashArmed -> rootState.antiFlash.message.ifBlank {
+            controlState.antiFlashArmed -> controlState.antiFlash.message.ifBlank {
                 "防闪已预置；等待游戏进程和双模块精确指纹"
             }
             else -> "可先预置；目标启动后等待 GameApp 与 tprt 精确指纹"
         }
 
-        RootFeature.READABLE_DATA -> when {
+        ControlFeature.READABLE_DATA -> when {
             !targetReady -> "连接控制服务并打开目标进程后启用"
             supported -> "字段档案已载入；下方显示生命状态、击杀数与 GetDataLong(1) 的逐项实读结果"
-            else -> "字段档案未就绪：${rootState.readOnlyFields.profileSummary}"
+            else -> "字段档案未就绪：${controlState.readOnlyFields.profileSummary}"
         }
 
-        RootFeature.FLIGHT -> when {
+        ControlFeature.FLIGHT -> when {
             !targetReady -> "连接控制服务并打开目标进程后启用"
-            rootState.injection.hasBlockingRuntimeFailureFor(feature) ->
-                "上次运行时校验未通过：${rootState.injection.runtimeFailureDetail()}；当前可直接重试"
+            controlState.injection.hasBlockingRuntimeFailureFor(feature) ->
+                "上次运行时校验未通过：${controlState.injection.runtimeFailureDetail()}；当前可直接重试"
             supported -> "地址档案已载入；首次操作将解析指针链并做写前、回读校验"
-            else -> "飞行档案未就绪：${rootState.injection.profileSummary}"
+            else -> "飞行档案未就绪：${controlState.injection.profileSummary}"
         }
 
-        RootFeature.PLAYER_TELEPORT -> when {
+        ControlFeature.PLAYER_TELEPORT -> when {
             !targetReady -> "连接控制服务并打开目标进程后启用"
-            rootState.injection.hasBlockingRuntimeFailureFor(feature) ->
-                "上次运行时校验未通过：${rootState.injection.runtimeFailureDetail()}；当前可直接重试"
+            controlState.injection.hasBlockingRuntimeFailureFor(feature) ->
+                "上次运行时校验未通过：${controlState.injection.runtimeFailureDetail()}；当前可直接重试"
             supported -> "地址档案已载入；应用时解析三轴指针并执行回读与失败回滚"
-            else -> "玩家传送档案未就绪：${rootState.injection.profileSummary}"
+            else -> "玩家传送档案未就绪：${controlState.injection.profileSummary}"
         }
     }
 }
 
-private fun RootInjectionState.runtimeFailureDetail(): String =
+private fun ControlInjectionState.runtimeFailureDetail(): String =
     message.ifBlank { lastApplyStatus.displayLabel() }
 
 @Composable
@@ -1119,21 +1119,21 @@ private fun PlayerPositionPanel(
     uiState: MainUiState,
     actions: MinixActions,
 ) {
-    val rootState = uiState.rootState
-    val targetReady = rootState.status == RootConnectionStatus.READY &&
-        rootState.hasVerifiedTargetIdentity
-    val supported = RootFeature.PLAYER_TELEPORT in rootState.supportedFeatures
-    val runtimeBlocked = rootState.injection.hasBlockingRuntimeFailureFor(
-        RootFeature.PLAYER_TELEPORT,
+    val controlState = uiState.controlState
+    val targetReady = controlState.status == ControlConnectionStatus.READY &&
+        controlState.hasVerifiedTargetIdentity
+    val supported = ControlFeature.PLAYER_TELEPORT in controlState.supportedFeatures
+    val runtimeBlocked = controlState.injection.hasBlockingRuntimeFailureFor(
+        ControlFeature.PLAYER_TELEPORT,
     )
-    val sessionKey = rootState.targetStartTimeTicks
+    val sessionKey = controlState.targetStartTimeTicks
     var xText by remember(sessionKey) { mutableStateOf("0") }
     var yText by remember(sessionKey) { mutableStateOf("0") }
     var zText by remember(sessionKey) { mutableStateOf("0") }
     val x = xText.toIntOrNull()
     val y = yText.toIntOrNull()
     val z = zText.toIntOrNull()
-    val lastResult = rootState.playerPosition
+    val lastResult = controlState.playerPosition
 
     SectionTitle("玩家传送")
     Surface(
@@ -1150,9 +1150,9 @@ private fun PlayerPositionPanel(
                 text = when {
                     !targetReady -> "连接控制服务与目标进程后写入三轴坐标"
                     runtimeBlocked ->
-                        "上次运行时校验未通过：${rootState.injection.runtimeFailureDetail()}；当前可直接重试"
+                        "上次运行时校验未通过：${controlState.injection.runtimeFailureDetail()}；当前可直接重试"
                     supported -> "地址档案已载入；应用时解析三轴指针、逐轴回读并在失败时回滚"
-                    else -> "玩家传送档案未就绪：${rootState.injection.profileSummary}"
+                    else -> "玩家传送档案未就绪：${controlState.injection.profileSummary}"
                 },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
@@ -1187,7 +1187,7 @@ private fun PlayerPositionPanel(
                     x != null && y != null && z != null,
                 onClick = {
                     actions.onPlayerPositionApply(
-                        RootPlayerPositionRequest(
+                        ControlPlayerPositionRequest(
                             x = requireNotNull(x),
                             y = requireNotNull(y),
                             z = requireNotNull(z),
@@ -1231,11 +1231,11 @@ private fun SearchIdPanel(
     uiState: MainUiState,
     actions: MinixActions,
 ) {
-    val rootState = uiState.rootState
-    val sessionKey = rootState.targetStartTimeTicks
+    val controlState = uiState.controlState
+    val sessionKey = controlState.targetStartTimeTicks
     var input by remember(sessionKey) { mutableStateOf("") }
     val requestedId = parseSearchIdInput(input)
-    val result = rootState.searchIdResult
+    val result = controlState.searchIdResult
 
     SectionTitle("SearchID 扫描")
     Surface(
@@ -1249,7 +1249,7 @@ private fun SearchIdPanel(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = if (rootState.hasVerifiedTargetIdentity && rootState.nativeProbe.isMemoryReady) {
+                text = if (controlState.hasVerifiedTargetIdentity && controlState.nativeProbe.isMemoryReady) {
                     "当前版本使用 GameApp 精确指纹和固定 40 槽只读扫描"
                 } else {
                     "连接控制服务并等待目标内存探测后扫描"
@@ -1269,7 +1269,7 @@ private fun SearchIdPanel(
             )
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = searchIdControlEnabled(rootState, requestedId),
+                enabled = searchIdControlEnabled(controlState, requestedId),
                 onClick = { actions.onSearchId(requireNotNull(requestedId)) },
             ) {
                 Icon(Icons.Outlined.Search, contentDescription = null)
@@ -1280,9 +1280,9 @@ private fun SearchIdPanel(
                 Text(
                     text = searchIdResultLabel(result),
                     color = when (result.status) {
-                        RootSearchIdStatus.MATCH -> Mint
-                        RootSearchIdStatus.NOT_FOUND -> MaterialTheme.colorScheme.primary
-                        RootSearchIdStatus.INVALID -> Coral
+                        ControlSearchIdStatus.MATCH -> Mint
+                        ControlSearchIdStatus.NOT_FOUND -> MaterialTheme.colorScheme.primary
+                        ControlSearchIdStatus.INVALID -> Coral
                     },
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
@@ -1305,18 +1305,18 @@ internal fun parseSearchIdInput(value: String): Long? =
     value.toLongOrNull()?.takeIf { it in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong() }
 
 internal fun searchIdControlEnabled(
-    rootState: RootRuntimeState,
+    controlState: ControlRuntimeState,
     requestedId: Long?,
-): Boolean = rootState.status == RootConnectionStatus.READY &&
-    rootState.hasVerifiedTargetIdentity &&
-    rootState.nativeProbe.isMemoryReady &&
+): Boolean = controlState.status == ControlConnectionStatus.READY &&
+    controlState.hasVerifiedTargetIdentity &&
+    controlState.nativeProbe.isMemoryReady &&
     requestedId != null
 
-internal fun searchIdResultLabel(result: RootSearchIdResult): String = when (result.status) {
-    RootSearchIdStatus.MATCH ->
+internal fun searchIdResultLabel(result: ControlSearchIdResult): String = when (result.status) {
+    ControlSearchIdStatus.MATCH ->
         "已命中 · ID ${result.requestedId} · 槽位 ${(result.slotIndex ?: 0) + 1}/40"
-    RootSearchIdStatus.NOT_FOUND -> "未命中 · ID ${result.requestedId} · 已扫描 40 槽"
-    RootSearchIdStatus.INVALID ->
+    ControlSearchIdStatus.NOT_FOUND -> "未命中 · ID ${result.requestedId} · 已扫描 40 槽"
+    ControlSearchIdStatus.INVALID ->
         "扫描失败 · ${result.invalidReason?.name ?: "INVALID_RESPONSE"}"
 }
 
@@ -1414,7 +1414,7 @@ private fun ReadOnlyFieldsPanel(uiState: MainUiState) {
 private fun ReadOnlyFieldRow(
     label: String,
     valueText: String,
-    status: RootReadOnlyFieldReadStatus,
+    status: ControlReadOnlyFieldReadStatus,
     message: String,
 ) {
     Column(
@@ -1434,9 +1434,9 @@ private fun ReadOnlyFieldRow(
             Text(
                 text = valueText,
                 color = when (status) {
-                    RootReadOnlyFieldReadStatus.OK -> Mint
-                    RootReadOnlyFieldReadStatus.IDLE,
-                    RootReadOnlyFieldReadStatus.FEATURE_DISABLED,
+                    ControlReadOnlyFieldReadStatus.OK -> Mint
+                    ControlReadOnlyFieldReadStatus.IDLE,
+                    ControlReadOnlyFieldReadStatus.FEATURE_DISABLED,
                     -> MaterialTheme.colorScheme.onSurfaceVariant
                     else -> Coral
                 },
@@ -1444,7 +1444,7 @@ private fun ReadOnlyFieldRow(
                 fontSize = 13.sp,
             )
         }
-        if (message.isNotBlank() && status != RootReadOnlyFieldReadStatus.OK) {
+        if (message.isNotBlank() && status != ControlReadOnlyFieldReadStatus.OK) {
             Text(
                 text = message,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1457,67 +1457,67 @@ private fun ReadOnlyFieldRow(
     }
 }
 
-private fun RootInt32FieldState.displayText(): String =
+private fun ControlInt32FieldState.displayText(): String =
     value?.takeIf { isAvailable }?.toString() ?: status.displayLabel()
 
-private fun RootInt64FieldState.displayText(): String =
+private fun ControlInt64FieldState.displayText(): String =
     value?.takeIf { isAvailable }?.let { bits ->
         "0x${bits.toULong().toString(16)}"
     } ?: status.displayLabel()
 
-private fun RootReadOnlyFieldProfileStatus.displayLabel(): String = when (this) {
-    RootReadOnlyFieldProfileStatus.IDLE -> "等待"
-    RootReadOnlyFieldProfileStatus.NO_PROFILE -> "未匹配"
-    RootReadOnlyFieldProfileStatus.INCOMPLETE_EVIDENCE -> "证据未闭合"
-    RootReadOnlyFieldProfileStatus.MODULE_NOT_FOUND -> "模块未就绪"
-    RootReadOnlyFieldProfileStatus.MODULE_AMBIGUOUS -> "模块不唯一"
-    RootReadOnlyFieldProfileStatus.FINGERPRINT_UNAVAILABLE -> "无指纹"
-    RootReadOnlyFieldProfileStatus.FINGERPRINT_MISMATCH -> "版本不匹配"
-    RootReadOnlyFieldProfileStatus.OFFSET_OUT_OF_RANGE -> "偏移异常"
-    RootReadOnlyFieldProfileStatus.READY -> "READY"
+private fun ControlReadOnlyFieldProfileStatus.displayLabel(): String = when (this) {
+    ControlReadOnlyFieldProfileStatus.IDLE -> "等待"
+    ControlReadOnlyFieldProfileStatus.NO_PROFILE -> "未匹配"
+    ControlReadOnlyFieldProfileStatus.INCOMPLETE_EVIDENCE -> "证据未闭合"
+    ControlReadOnlyFieldProfileStatus.MODULE_NOT_FOUND -> "模块未就绪"
+    ControlReadOnlyFieldProfileStatus.MODULE_AMBIGUOUS -> "模块不唯一"
+    ControlReadOnlyFieldProfileStatus.FINGERPRINT_UNAVAILABLE -> "无指纹"
+    ControlReadOnlyFieldProfileStatus.FINGERPRINT_MISMATCH -> "版本不匹配"
+    ControlReadOnlyFieldProfileStatus.OFFSET_OUT_OF_RANGE -> "偏移异常"
+    ControlReadOnlyFieldProfileStatus.READY -> "READY"
 }
 
-private fun RootReadOnlyFieldReadStatus.displayLabel(): String = when (this) {
-    RootReadOnlyFieldReadStatus.IDLE -> "未读取"
-    RootReadOnlyFieldReadStatus.OK -> "已读取"
-    RootReadOnlyFieldReadStatus.SESSION_CLOSED -> "会话关闭"
-    RootReadOnlyFieldReadStatus.TARGET_CHANGED -> "目标变化"
-    RootReadOnlyFieldReadStatus.PROFILE_NOT_READY -> "档案未就绪"
-    RootReadOnlyFieldReadStatus.FEATURE_DISABLED -> "读取未启用"
-    RootReadOnlyFieldReadStatus.FIELD_NOT_AVAILABLE -> "字段不可用"
-    RootReadOnlyFieldReadStatus.READ_FAILED -> "读取失败"
+private fun ControlReadOnlyFieldReadStatus.displayLabel(): String = when (this) {
+    ControlReadOnlyFieldReadStatus.IDLE -> "未读取"
+    ControlReadOnlyFieldReadStatus.OK -> "已读取"
+    ControlReadOnlyFieldReadStatus.SESSION_CLOSED -> "会话关闭"
+    ControlReadOnlyFieldReadStatus.TARGET_CHANGED -> "目标变化"
+    ControlReadOnlyFieldReadStatus.PROFILE_NOT_READY -> "档案未就绪"
+    ControlReadOnlyFieldReadStatus.FEATURE_DISABLED -> "读取未启用"
+    ControlReadOnlyFieldReadStatus.FIELD_NOT_AVAILABLE -> "字段不可用"
+    ControlReadOnlyFieldReadStatus.READ_FAILED -> "读取失败"
 }
 
-private fun RootInjectionProfileStatus.displayLabel(): String = when (this) {
-    RootInjectionProfileStatus.IDLE -> "等待"
-    RootInjectionProfileStatus.NO_PROFILE -> "未匹配"
-    RootInjectionProfileStatus.SCHEMA_UNSUPPORTED -> "档案版本不兼容"
-    RootInjectionProfileStatus.INCOMPLETE_EVIDENCE -> "证据未闭合"
-    RootInjectionProfileStatus.ABI_MISMATCH -> "ABI 不匹配"
-    RootInjectionProfileStatus.MODULE_NOT_FOUND -> "模块未就绪"
-    RootInjectionProfileStatus.MODULE_AMBIGUOUS -> "模块不唯一"
-    RootInjectionProfileStatus.FINGERPRINT_UNAVAILABLE -> "无模块指纹"
-    RootInjectionProfileStatus.FINGERPRINT_MISMATCH -> "模块版本不匹配"
-    RootInjectionProfileStatus.PATCH_OUT_OF_RANGE -> "标量偏移异常"
-    RootInjectionProfileStatus.INVALID_RESPONSE -> "响应异常"
-    RootInjectionProfileStatus.READY -> "READY"
+private fun ControlInjectionProfileStatus.displayLabel(): String = when (this) {
+    ControlInjectionProfileStatus.IDLE -> "等待"
+    ControlInjectionProfileStatus.NO_PROFILE -> "未匹配"
+    ControlInjectionProfileStatus.SCHEMA_UNSUPPORTED -> "档案版本不兼容"
+    ControlInjectionProfileStatus.INCOMPLETE_EVIDENCE -> "证据未闭合"
+    ControlInjectionProfileStatus.ABI_MISMATCH -> "ABI 不匹配"
+    ControlInjectionProfileStatus.MODULE_NOT_FOUND -> "模块未就绪"
+    ControlInjectionProfileStatus.MODULE_AMBIGUOUS -> "模块不唯一"
+    ControlInjectionProfileStatus.FINGERPRINT_UNAVAILABLE -> "无模块指纹"
+    ControlInjectionProfileStatus.FINGERPRINT_MISMATCH -> "模块版本不匹配"
+    ControlInjectionProfileStatus.PATCH_OUT_OF_RANGE -> "标量偏移异常"
+    ControlInjectionProfileStatus.INVALID_RESPONSE -> "响应异常"
+    ControlInjectionProfileStatus.READY -> "READY"
 }
 
-private fun RootInjectionApplyStatus.displayLabel(): String = when (this) {
-    RootInjectionApplyStatus.IDLE -> "未执行"
-    RootInjectionApplyStatus.APPLIED -> "已应用"
-    RootInjectionApplyStatus.ALREADY_APPLIED -> "已是目标状态"
-    RootInjectionApplyStatus.SESSION_CLOSED -> "会话关闭"
-    RootInjectionApplyStatus.TARGET_CHANGED -> "目标变化"
-    RootInjectionApplyStatus.PROFILE_NOT_READY -> "档案未就绪"
-    RootInjectionApplyStatus.FEATURE_NOT_DEFINED -> "功能未定义"
-    RootInjectionApplyStatus.PRECONDITION_READ_FAILED -> "前置读失败"
-    RootInjectionApplyStatus.EXPECTED_VALUE_MISMATCH -> "expected value 不匹配"
-    RootInjectionApplyStatus.BACKEND_UNAVAILABLE -> "后端未就绪"
-    RootInjectionApplyStatus.WRITE_FAILED -> "写入失败"
-    RootInjectionApplyStatus.VERIFY_FAILED -> "回读验证失败"
-    RootInjectionApplyStatus.ROLLBACK_FAILED -> "回滚失败"
-    RootInjectionApplyStatus.INVALID_RESPONSE -> "响应异常"
+private fun ControlInjectionApplyStatus.displayLabel(): String = when (this) {
+    ControlInjectionApplyStatus.IDLE -> "未执行"
+    ControlInjectionApplyStatus.APPLIED -> "已应用"
+    ControlInjectionApplyStatus.ALREADY_APPLIED -> "已是目标状态"
+    ControlInjectionApplyStatus.SESSION_CLOSED -> "会话关闭"
+    ControlInjectionApplyStatus.TARGET_CHANGED -> "目标变化"
+    ControlInjectionApplyStatus.PROFILE_NOT_READY -> "档案未就绪"
+    ControlInjectionApplyStatus.FEATURE_NOT_DEFINED -> "功能未定义"
+    ControlInjectionApplyStatus.PRECONDITION_READ_FAILED -> "前置读失败"
+    ControlInjectionApplyStatus.EXPECTED_VALUE_MISMATCH -> "expected value 不匹配"
+    ControlInjectionApplyStatus.BACKEND_UNAVAILABLE -> "后端未就绪"
+    ControlInjectionApplyStatus.WRITE_FAILED -> "写入失败"
+    ControlInjectionApplyStatus.VERIFY_FAILED -> "回读验证失败"
+    ControlInjectionApplyStatus.ROLLBACK_FAILED -> "回滚失败"
+    ControlInjectionApplyStatus.INVALID_RESPONSE -> "响应异常"
 }
 
 @Composable
@@ -1700,9 +1700,9 @@ private fun SettingsScreen(
     uiState: MainUiState,
     actions: MinixActions,
 ) {
-    val rootStatus = uiState.rootState.status
-    val rootBusy = rootStatus == RootConnectionStatus.REQUESTING ||
-        rootStatus == RootConnectionStatus.CONNECTING
+    val controlStatus = uiState.controlState.status
+    val controlBusy = controlStatus == ControlConnectionStatus.REQUESTING ||
+        controlStatus == ControlConnectionStatus.CONNECTING
     PageColumn(title = "设置与隐私", subtitle = "设备内的权限、外观与数据管理") {
         ActionSetting(
             icon = Icons.Outlined.Security,
@@ -1715,14 +1715,14 @@ private fun SettingsScreen(
         ActionSetting(
             icon = Icons.Outlined.Security,
             title = "同 UID 控制服务",
-            detail = uiState.rootState.message,
+            detail = uiState.controlState.message,
             actionLabel = when {
-                rootBusy -> "处理中"
-                rootStatus == RootConnectionStatus.READY -> "断开"
+                controlBusy -> "处理中"
+                controlStatus == ControlConnectionStatus.READY -> "断开"
                 else -> "连接服务"
             },
-            enabled = !rootBusy,
-            onClick = if (rootStatus == RootConnectionStatus.READY) {
+            enabled = !controlBusy,
+            onClick = if (controlStatus == ControlConnectionStatus.READY) {
                 actions.onDisconnectControlService
             } else {
                 actions.onConnectControlService

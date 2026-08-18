@@ -3637,7 +3637,7 @@ bool CopyStringArray(JNIEnv* env, jobjectArray source, std::vector<std::string>*
 }  // namespace
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeInspect(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeInspect(
     JNIEnv* env,
     jobject,
     jint pid
@@ -3659,7 +3659,7 @@ Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeInspect(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeReadScalar(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeReadScalar(
     JNIEnv* env,
     jobject,
     jint pid,
@@ -3708,7 +3708,7 @@ Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeReadScalar(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeCompareExchangeScalar(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeCompareExchangeScalar(
     JNIEnv* env,
     jobject,
     jint pid,
@@ -3775,7 +3775,7 @@ Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeCompareExchangeS
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeReadPagemapEntry(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeReadPagemapEntry(
     JNIEnv* env,
     jobject,
     jint pid,
@@ -3819,7 +3819,7 @@ Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeReadPagemapEntry
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeReadMemoryRegions(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeReadMemoryRegions(
     JNIEnv* env,
     jobject,
     jint pid,
@@ -3888,7 +3888,7 @@ Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeReadMemoryRegion
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeWriteVerifyU32Batch(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeWriteVerifyU32Batch(
     JNIEnv* env,
     jobject,
     jint pid,
@@ -3999,7 +3999,7 @@ Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeWriteVerifyU32Ba
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_me_dartcv_minix_root_nativeadapter_TargetNativeProbe_nativeRunAntiFlashCycle(
+Java_me_dartcv_minix_control_nativeadapter_TargetNativeProbe_nativeRunAntiFlashCycle(
     JNIEnv* env,
     jobject,
     jint pid,

@@ -51,7 +51,7 @@
         </service>
 
         <service
-                android:name=".root.RootFeatureService"
+                android:name=".control.ControlService"
                 android:exported="false"
                 android:process=":control" />
     </application>

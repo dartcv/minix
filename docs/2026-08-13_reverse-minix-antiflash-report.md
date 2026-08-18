@@ -99,7 +99,7 @@ b   entry
 
 ### 5.1 profile 与目标解析
 
-`RootAntiFlashProfileCatalog` 将以下条件固化为不可变 profile：
+`ControlAntiFlashProfileCatalog` 将以下条件固化为不可变 profile：
 
 - `arm64-v8a`、目标版本 `1.58.2`；
 - GameApp 与 tprt 的 SHA-256、大小和 Build-ID；
@@ -122,7 +122,7 @@ start-end perms offset device inode path
 
 ### 5.3 deleted 映射指纹
 
-当模块路径带 ` (deleted)` 时，普通的 `/proc/<pid>/root<path>` 已不能代表当前映射对象。`ProcRootModuleFingerprintProvider` 会在 maps 中选择唯一、offset-zero、loadBase 精确匹配的行，再从：
+当模块路径带 ` (deleted)` 时，普通的 `/proc/<pid>/root<path>` 已不能代表当前映射对象。这里的 `root` 是 Linux procfs 提供的进程根路径名，不表示权限方案。`ProcControlModuleFingerprintProvider` 会在 maps 中选择唯一、offset-zero、loadBase 精确匹配的行，再从：
 
 ```text
 /proc/<pid>/map_files/<start>-<end>
@@ -168,7 +168,7 @@ MINIX 停止时不是只回滚“看起来已经写过”的部分，而是构�
 
 服务端使用 `antiFlashCommandLock` 串行化：启动/停止防闪、打开或刷新目标、关闭目标和 Service 销毁。worker 停止流程先设置停止标志，再等待当前事务结束，之后执行完整回滚。
 
-客户端 `RootController` 也通过 `operationMutex` 串行管理目标切换、扫描、关闭和断开。`disconnect()` 是挂起操作：先请求服务停止并确认 `requestedEnabled=false`、`workerRunning=false`、`applied=false`，再解绑；回滚失败则保留 Binder 连接、旧目标会话和错误状态。Application 不再在同步生命周期回调中直接丢弃 controller 上下文。
+客户端 `ControlController` 也通过 `operationMutex` 串行管理目标切换、扫描、关闭和断开。`disconnect()` 是挂起操作：先请求服务停止并确认 `requestedEnabled=false`、`workerRunning=false`、`applied=false`，再解绑；回滚失败则保留 Binder 连接、旧目标会话和错误状态。Application 不再在同步生命周期回调中直接丢弃 controller 上下文。
 
 ### 5.7 状态机
 
@@ -234,14 +234,14 @@ $j.full_iteration_writer_sites | Format-Table site,destination,payload
 
 - `observed_at`: `2026-08-13`
 - `source_type`: `file`
-- `source_ref`: `app/src/main/java/me/dartcv/minix/root/RootAntiFlash.kt`
+- `source_ref`: `app/src/main/java/me/dartcv/minix/control/ControlAntiFlash.kt`
 - `content_hash`: `F05003F9B9FE9833ABD54D19CDD8B860F0C0C87ED3638810D266FE87A1B90CD6`
 - `linked_workitem`: `n/a`
 - `supersedes`: `none`
 - `repro_command`:
 
 ```powershell
-Select-String -Path app\src\main\java\me\dartcv\minix\root\RootAntiFlash.kt `
+Select-String -Path app\src\main\java\me\dartcv\minix\control\ControlAntiFlash.kt `
   -Pattern 'profileId|sha256|codeRegions|word\(|bssMarkerOffset|iterationDelayMillis|expectedCurrentBytes|stopAndRollback'
 ```
 
@@ -268,14 +268,14 @@ Select-String -Path app\src\main\cpp\target_native_probe.cpp `
 
 - `observed_at`: `2026-08-13`
 - `source_type`: `file`
-- `source_ref`: `app/src/main/java/me/dartcv/minix/root/RootNativeProbe.kt`
+- `source_ref`: `app/src/main/java/me/dartcv/minix/control/ControlNativeProbe.kt`
 - `content_hash`: `8ED03EB76D82ADE2590C4767CFCDF360324962EFEEA6AAF7C2044BC91B66F760`
 - `linked_workitem`: `n/a`
 - `supersedes`: `none`
 - `repro_command`:
 
 ```powershell
-Select-String -Path app\src\main\java\me\dartcv\minix\root\RootNativeProbe.kt `
+Select-String -Path app\src\main\java\me\dartcv\minix\control\ControlNativeProbe.kt `
   -Pattern 'DELETED_MAPPING_SUFFIX|map_files|findDeletedMapping|expectedLength|sha256StreamFile'
 ```
 
@@ -285,7 +285,7 @@ Select-String -Path app\src\main\java\me\dartcv\minix\root\RootNativeProbe.kt `
 
 - `observed_at`: `2026-08-13`
 - `source_type`: `file`
-- `source_ref`: `RootFeatureService.kt`, `RootController.kt`, `MinixApplication.kt`
+- `source_ref`: `ControlService.kt`, `ControlController.kt`, `MinixApplication.kt`
 - `content_hash`: Service `A3A894393EA2867400AB0EC14EE207522538F23908D39475896F3BD01FE8EC2A`；Controller `65A92D96B9B3A1EDFAA9676881B892316F10752BF19BBD61F6E168B0B6EF5ED1`；Application `7FCF0E74A63ACF90AD5D5113C63A7A4DE50785FA37FA881303CDB184278D7646`
 - `linked_workitem`: `n/a`
 - `supersedes`: `none`
@@ -293,10 +293,10 @@ Select-String -Path app\src\main\java\me\dartcv\minix\root\RootNativeProbe.kt `
 
 ```powershell
 Select-String -Path `
-  app\src\main\java\me\dartcv\minix\root\RootFeatureService.kt, `
-  app\src\main\java\me\dartcv\minix\root\RootController.kt, `
+  app\src\main\java\me\dartcv\minix\control\ControlService.kt, `
+  app\src\main\java\me\dartcv\minix\control\ControlController.kt, `
   app\src\main\java\me\dartcv\minix\MinixApplication.kt `
-  -Pattern 'antiFlashCommandLock|stopAntiFlashIfActiveLocked|suspend fun disconnect|stopActiveTargetForSwitchLocked|rootControllerDelegate'
+  -Pattern 'antiFlashCommandLock|stopAntiFlashIfActiveLocked|suspend fun disconnect|stopActiveTargetForSwitchLocked|controlControllerDelegate'
 ```
 
 - `raw_excerpt`: 服务端命令锁和客户端 operation mutex 均阻止带残留补丁的目标被关闭、替换或无条件断开。
@@ -348,7 +348,7 @@ foreach ($name in 'debug','release') {
 - `category`: `design`
 - `status`: `validated`
 - `evidence_ids`: `E-002`, `E-003`, `E-005`
-- `location`: `RootAntiFlashProfileCatalog`, `ProcRootAntiFlashTargetResolver`, `ProcRootModuleFingerprintProvider`
+- `location`: `ControlAntiFlashProfileCatalog`, `ProcControlAntiFlashTargetResolver`, `ProcControlModuleFingerprintProvider`
 - `confidence`: `high`
 - `impact`: 同名但不同版本、不同 inode 或 deleted backing object 不会进入写入阶段。
 - `repro_steps`: 核对 profile 双 SHA；核对唯一 offset-zero RX 映射；核对 deleted map_files 路径。
@@ -360,7 +360,7 @@ foreach ($name in 'debug','release') {
 - `category`: `design`
 - `status`: `validated`
 - `evidence_ids`: `E-003`, `E-004`, `E-007`
-- `location`: `RootAntiFlashSupervisor.runOneCycle`, `RunAntiFlashCycle`
+- `location`: `ControlAntiFlashSupervisor.runOneCycle`, `RunAntiFlashCycle`
 - `confidence`: `high`
 - `impact`: 未知原值、身份变化、mapping 变化、短写或回读不符均产生 typed failure，不继续静默写入。
 - `repro_steps`: 运行完整单测；审查 6 区 preflight；审查 17 项 pwrite64/pread64 和末尾身份复核。
@@ -372,10 +372,10 @@ foreach ($name in 'debug','release') {
 - `category`: `design`
 - `status`: `validated`
 - `evidence_ids`: `E-003`, `E-004`, `E-007`
-- `location`: `RootAntiFlashTarget.scopedMapsGeneration`, `CanonicalMapRegion`, `PrepareScopedMapsSnapshot`
+- `location`: `ControlAntiFlashTarget.scopedMapsGeneration`, `CanonicalMapRegion`, `PrepareScopedMapsSnapshot`
 - `confidence`: `high`
 - `impact`: 无关 maps 抖动不会强制停止；真正承载目标字节的 mapping 身份变化会 fail closed。
-- `repro_steps`: 运行 `RootAntiFlashScopedMapsTest`；比较 device/inode 变化与无关 mapping 变化用例。
+- `repro_steps`: 运行 `ControlAntiFlashScopedMapsTest`；比较 device/inode 变化与无关 mapping 变化用例。
 - `remediation`: Kotlin/C++ canonical 格式必须同步变更并保留交叉测试。
 
 ### F-005：回滚是完整 17 项 CAS 风格批次
@@ -384,7 +384,7 @@ foreach ($name in 'debug','release') {
 - `category`: `design`
 - `status`: `validated`
 - `evidence_ids`: `E-003`, `E-004`, `E-006`, `E-007`
-- `location`: `RootAntiFlashSupervisor.stopAndRollback`, `JniRootAntiFlashBackend.writeAndVerifyBatch`, native `ROLLBACK`
+- `location`: `ControlAntiFlashSupervisor.stopAndRollback`, `JniControlAntiFlashBackend.writeAndVerifyBatch`, native `ROLLBACK`
 - `confidence`: `high`
 - `impact`: guard 变化时不覆盖第三方或目标自身的新值；失败上下文保留，可再次停止并重试。
 - `repro_steps`: 运行 guard mismatch、partial failure、maps change 和 retry 单测；审查 expected current native pread。
@@ -412,8 +412,8 @@ foreach ($name in 'debug','release') {
 - `steps`:
   1. `JNI -> pthread_create -> worker 0x55425c`，确定独立持续线程。evidence: `E-001`; finding: `F-001`
   2. `maps resolver -> GameApp/tprt/BSS -> 17 writer_u32`，恢复 6 区、17 u32 与 22 ms 周期。evidence: `E-001`, `E-002`; finding: `F-001`
-  3. `RootAntiFlashProfileCatalog -> ProcRootAntiFlashTargetResolver`，用双 SO SHA、原字节和 scoped maps 固定目标。evidence: `E-003`, `E-005`; finding: `F-002`, `F-004`
-  4. `RootFeatureService -> RootAntiFlashSupervisor -> TargetNativeProbe.runAntiFlashCycle`，完成 preflight、17 写、逐项回读和末尾身份复核。evidence: `E-003`, `E-004`; finding: `F-003`
+  3. `ControlAntiFlashProfileCatalog -> ProcControlAntiFlashTargetResolver`，用双 SO SHA、原字节和 scoped maps 固定目标。evidence: `E-003`, `E-005`; finding: `F-002`, `F-004`
+  4. `ControlService -> ControlAntiFlashSupervisor -> TargetNativeProbe.runAntiFlashCycle`，完成 preflight、17 写、逐项回读和末尾身份复核。evidence: `E-003`, `E-004`; finding: `F-003`
   5. `stop/target switch/disconnect -> stopAndRollback -> rollbackU32Batch`，用 17 个 expected-current guard 恢复原值。evidence: `E-003`, `E-004`, `E-006`; finding: `F-005`
 - `residual_risks`: 真机 mem fd 权限、SELinux、目标启动时序、真实 maps、写入后的实际稳定性和防闪业务效果待验证。
 
@@ -461,7 +461,7 @@ foreach ($name in 'debug','release') {
 | `minSdk` / `targetSdk` | `28` / `36` |
 | ABI | `arm64-v8a` |
 | 目标包可见性 | `<queries>` 精确列举 9 个渠道包 |
-| 控制 Service | `RootFeatureService`，`exported=false`，`process=:control` |
+| 控制 Service | `ControlService`，`exported=false`，`process=:control` |
 | 网络/全包权限 | 未声明 `INTERNET`，未声明 `QUERY_ALL_PACKAGES` |
 | Binder 协议 | v8 |
 
@@ -486,12 +486,12 @@ foreach ($name in 'debug','release') {
 
 | 责任 | 文件 |
 |---|---|
-| 防闪 profile、resolver、supervisor、回滚状态 | `app/src/main/java/me/dartcv/minix/root/RootAntiFlash.kt` |
-| 双 SO 指纹与 deleted map_files | `app/src/main/java/me/dartcv/minix/root/RootNativeProbe.kt` |
-| JNI 参数与 typed payload | `app/src/main/java/me/dartcv/minix/root/nativeadapter/TargetNativeProbe.kt` |
+| 防闪 profile、resolver、supervisor、回滚状态 | `app/src/main/java/me/dartcv/minix/control/ControlAntiFlash.kt` |
+| 双 SO 指纹与 deleted map_files | `app/src/main/java/me/dartcv/minix/control/ControlNativeProbe.kt` |
+| JNI 参数与 typed payload | `app/src/main/java/me/dartcv/minix/control/nativeadapter/TargetNativeProbe.kt` |
 | scoped maps、mem cycle、条件 rollback | `app/src/main/cpp/target_native_probe.cpp` |
-| worker 与服务端命令串行 | `app/src/main/java/me/dartcv/minix/root/RootFeatureService.kt` |
-| 预置、轮询、目标切换与挂起断开 | `app/src/main/java/me/dartcv/minix/root/RootController.kt` |
+| worker 与服务端命令串行 | `app/src/main/java/me/dartcv/minix/control/ControlService.kt` |
+| 预置、轮询、目标切换与挂起断开 | `app/src/main/java/me/dartcv/minix/control/ControlController.kt` |
 | UI 轮询接线 | `app/src/main/java/me/dartcv/minix/MainViewModel.kt` |
 | controller 生命周期所有权 | `app/src/main/java/me/dartcv/minix/MinixApplication.kt` |
 

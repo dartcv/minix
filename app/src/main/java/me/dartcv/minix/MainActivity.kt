@@ -202,7 +202,7 @@ class MainActivity : ComponentActivity() {
             val packageName = viewModel.armAntiFlashForLaunch() ?: return@launch
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent == null) {
-                viewModel.setControlFeatureEnabled(me.dartcv.minix.root.RootFeature.ANTI_FLASH, false)
+                viewModel.setControlFeatureEnabled(me.dartcv.minix.control.ControlFeature.ANTI_FLASH, false)
                 viewModel.record("未找到游戏启动入口：$packageName")
                 return@launch
             }
@@ -211,7 +211,7 @@ class MainActivity : ComponentActivity() {
             }.onSuccess {
                 viewModel.record("游戏已启动；服务侧防闪监听已就绪")
             }.onFailure { error ->
-                viewModel.setControlFeatureEnabled(me.dartcv.minix.root.RootFeature.ANTI_FLASH, false)
+                viewModel.setControlFeatureEnabled(me.dartcv.minix.control.ControlFeature.ANTI_FLASH, false)
                 viewModel.record("启动游戏失败：${error.message ?: error.javaClass.simpleName}")
             }
         }

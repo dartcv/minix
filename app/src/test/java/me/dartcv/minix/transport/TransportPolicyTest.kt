@@ -18,22 +18,11 @@ class TransportPolicyTest {
     }
 
     @Test
-    fun rootAndSuPathsAreDisabledAndMarkedDeprecated() {
+    fun serviceBoundaryIsExplicitAndNonExported() {
         val policy = TransportPolicy.current
 
-        assertFalse(policy.rootPrivilegeRequired)
-        assertFalse(policy.suShellEntryPointEnabled)
-        assertFalse(policy.rootEntryPointEnabled)
-        assertTrue(policy.rootSchemeDeprecated)
-    }
-
-    @Test
-    fun historicalRootNamespaceIsCompatibilityOnlyAndUsesExactMatching() {
-        val policy = TransportPolicy.current
-
-        assertEquals("me.dartcv.minix.root", policy.historicalCompatibilityNamespace)
-        assertTrue(policy.isHistoricalCompatibilityNamespace("me.dartcv.minix.root"))
-        assertFalse(policy.isHistoricalCompatibilityNamespace("me.dartcv.minix.root.extra"))
-        assertFalse(policy.isHistoricalCompatibilityNamespace("me.dartcv.minix.control"))
+        assertFalse(policy.serviceExported)
+        assertEquals(":control", policy.serviceProcessName)
+        assertEquals("me.dartcv.minix.control.IControlBridge", policy.aidlDescriptor)
     }
 }

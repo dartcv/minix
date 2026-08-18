@@ -1,9 +1,9 @@
 # MINIX 防闪真机运行时验收报告
 
-> 报告日期：2026-08-17  
-> 项目：`D:\Projects\minix`  
-> 目标版本：迷你世界 `1.58.2` / `arm64-v8a`  
-> 验收结论：证书 + `sharedUserId` + `debuggable` 路径已在 Android 16 真机通过；本次路径未调用 Root 或 `su` 读写目标内存。  
+> 报告日期：2026-08-17
+> 项目：`D:\Projects\minix`
+> 目标版本：迷你世界 `1.58.2` / `arm64-v8a`
+> 验收结论：证书 + `sharedUserId` + `debuggable` 路径已在 Android 16 真机通过；防闪由 MINIX 自有 JNI/native probe 执行，所有读写均受同 UID、PID/startTime 与 scoped maps 指纹门禁约束。
 > 产物说明：防闪闭环运行时证据绑定 SHA-256 为 `388438A67ACA9206A19B5CC97D9A087A5C7BE79E01FFDAD9C878AD555142E4A8` 的历史 Debug APK。随后从相同代码状态强制重建，Debug/Release SHA-256 分别为 `6793F04B542BA8697E287A3CF3B10669B092D8AB8C944030772F9817B02353C3` 和 `8539A63FBCF70975F5ED10BB68786FCC695A30BF630AD6376222C769FC85F227`；重建导致 APK 字节级哈希变化。最终 Debug 已安装并通过冷启动冒烟，但没有重新执行整套防闪循环。
 
 ## 1. 执行摘要
@@ -24,7 +24,7 @@ successfulWriteCount = iterationCount × 17
 
 启动采样显示 worker 在目标启动后的 `2.866 s` 出现。停止后的 UI 明确显示 `防闪 · 已停止` 和 `Anti-flash stopped and rollback verified`；独立停止采样显示 worker 从存在变为消失。顶部按钮也能进入 `防闪运行中，返回游戏` 状态。
 
-本次验收使用的实际访问链为：两个 APK 使用相同签名证书和 `sharedUserId`，目标 APK 设置 `debuggable=true`，系统把两个包安装为同一 Linux UID `10552`；MINIX 再通过 JNI 打开 `/proc/<pid>/mem` 执行受 PID、进程启动时间和 scoped maps 指纹约束的读写。源码中的 `Root*` 命名是历史命名，不代表本次路径会请求或使用 Root 权限。
+本次验收使用的实际访问链为：两个 APK 使用相同签名证书和 `sharedUserId`，目标 APK 设置 `debuggable=true`，系统把两个包安装为同一 Linux UID `10552`；MINIX 通过 `:control` 进程中的 JNI/native probe 打开 `/proc/<pid>/mem`，执行受 PID、进程启动时间和 scoped maps 指纹约束的 typed 读写。
 
 防闪验收后又执行了最终完整构建矩阵：`110/110` tasks、`31` 个测试套件、`206` 项单元测试全部通过，lint 为 `0 error / 15 warning`。最终 Debug 已重新安装到同一设备，设备端 APK 哈希与本地构建一致，并以冷启动方式在 `598 ms` 内打开主界面。
 
@@ -46,7 +46,7 @@ successfulWriteCount = iterationCount × 17
 | 运行时验证 | 包 UID、worker 启停、PID 绑定、17 写计数恒等式、UI 状态、停止回滚结果 |
 | 最终构建验证 | 强制重跑 unit test、native debug、Debug/Release assemble 与 lint；安装最终 Debug 并冷启动冒烟 |
 | 取证方法 | Manifest/签名静态检查、UI hierarchy XML、`/proc` 线程采样、设备身份快照 |
-| 明确排除 | Root 读写链、logcat 归因、虚拟机、长时间稳定性、游戏全部场景、其他功能项完整验收 |
+| 本轮未覆盖 | SearchID/LIFE_STATE 等其他功能读写、logcat 归因、虚拟机、长时间稳定性、游戏全部场景和其他功能项的完整验收 |
 
 ### 2.1 样本身份
 
@@ -231,8 +231,8 @@ Import-Csv -Delimiter "`t" -LiteralPath `
 
 - `observed_at`: `2026-08-17`
 - `source_type`: `file`
-- `source_ref`: [RootAntiFlash.kt](../app/src/main/java/me/dartcv/minix/root/RootAntiFlash.kt)、[RootFeatureService.kt](../app/src/main/java/me/dartcv/minix/root/RootFeatureService.kt)、[RootNativeProbe.kt](../app/src/main/java/me/dartcv/minix/root/RootNativeProbe.kt)、[TargetNativeProbe.kt](../app/src/main/java/me/dartcv/minix/root/nativeadapter/TargetNativeProbe.kt)、[target_native_probe.cpp](../app/src/main/cpp/target_native_probe.cpp)
-- `content_hash`: `RootAntiFlash.kt=7F0825126983D8E8E13C8774ACD7C541937974B23D496D6F3946CDB45EFB8797`；`RootFeatureService.kt=927EDA711BFAD883E188465100A49AAD9A4971C28EC0E8380C2D872830078442`；`RootNativeProbe.kt=8ED03EB76D82ADE2590C4767CFCDF360324962EFEEA6AAF7C2044BC91B66F760`；`TargetNativeProbe.kt=59BE51959CF15A36754E48DB96A9ED545FC2FC702A3275DA1399265186BBB500`；`target_native_probe.cpp=1DD338B49872EC70819BE795CA3C7A90AE9352595678B39398ABB8E52D78DD6B`
+- `source_ref`: [ControlAntiFlash.kt](../app/src/main/java/me/dartcv/minix/control/ControlAntiFlash.kt)、[ControlService.kt](../app/src/main/java/me/dartcv/minix/control/ControlService.kt)、[ControlNativeProbe.kt](../app/src/main/java/me/dartcv/minix/control/ControlNativeProbe.kt)、[TargetNativeProbe.kt](../app/src/main/java/me/dartcv/minix/control/nativeadapter/TargetNativeProbe.kt)、[target_native_probe.cpp](../app/src/main/cpp/target_native_probe.cpp)
+- `content_hash`（当前 Control 重构源码）：`ControlAntiFlash.kt=426F3A3B6CC8B41D881E09E194510616D24289C3D6B5F187A9455E63B95A544D`；`ControlService.kt=CFCF34DEE3A3816F4C6BFA76043882D7B7B3684A243F46600FBBF321A0557F6F`；`ControlNativeProbe.kt=70FBD9E7849096D9DB54BEF188BE1496A708422D78E17597049519D029B5CFFC`；`TargetNativeProbe.kt=54073BB30A846385759A4283E4C1CA72B10E38E1637AC6AC17470B0DEEB1EE5D`；`target_native_probe.cpp=10EF31615B46A62736A8BE5241AEB7155ECFF6179DBDCF10AE8CB303259CE04A`
 - `linked_workitem`: `n/a`
 - `supersedes`: `none`
 - `repro_command`:
@@ -240,7 +240,7 @@ Import-Csv -Delimiter "`t" -LiteralPath `
 ```powershell
 rg -n `
   'expectedUid = Process.myUid|ANTI_FLASH_CODE_REGION_COUNT|ANTI_FLASH_WRITE_COUNT|scoped mappings|successfulWriteCount|rollback verified|O_RDWR' `
-  D:\Projects\minix\app\src\main\java\me\dartcv\minix\root `
+  D:\Projects\minix\app\src\main\java\me\dartcv\minix\control `
   D:\Projects\minix\app\src\main\cpp\target_native_probe.cpp
 ```
 
@@ -305,8 +305,8 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $files
 - `status`: `validated`
 - `evidence_ids`: `[E-001, E-002, E-009]`
 - `confidence`: `high`
-- `location`: 两份 `AndroidManifest.xml`；`RootFeatureService.kt:38-52`
-- `impact`: MINIX 与目标被安装为同一 Linux UID `10552`，并在 SELinux Enforcing 的 Android 16 设备上获得本轮 `/proc/<pid>` 访问条件。本次防闪链不依赖 Root 授权，但依赖配套目标 APK 的重签名、相同 `sharedUserId` 和 `debuggable=true`。
+- `location`: 两份 `AndroidManifest.xml`；`ControlService.kt:38-52`
+- `impact`: MINIX 与目标被安装为同一 Linux UID `10552`，并在 SELinux Enforcing 的 Android 16 设备上获得本轮 `/proc/<pid>` 访问条件。防闪链依赖配套目标 APK 的重签名、相同 `sharedUserId`、`debuggable=true` 以及 `:control` Service 的身份门禁。
 - `repro_steps`:
   1. 用 E-002 命令确认两份 APK 的 signer、`sharedUserId` 和 `debuggable`。
   2. 安装后读取 E-001，确认两个包 UID 相同。
@@ -319,7 +319,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $files
 - `status`: `validated`
 - `evidence_ids`: `[E-003, E-004, E-006]`
 - `confidence`: `high`
-- `location`: `RootFeatureService` anti-flash worker；MINIX 控制页
+- `location`: `ControlService` anti-flash worker；MINIX 控制页
 - `impact`: 预置后无需目标进程预先存在；本次固化 trace 中 worker 在 `2.866 s` 出现，随后 UI 绑定 PID `23696` 并进入运行态。
 - `repro_steps`:
   1. 在 MINIX 点击 `预置防闪并启动游戏`。
@@ -334,7 +334,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $files
 - `status`: `validated`
 - `evidence_ids`: `[E-004, E-005, E-007, E-009]`
 - `confidence`: `high`
-- `location`: `RootAntiFlash.kt:780-850`；`TargetNativeProbe.kt:546-647`
+- `location`: `ControlAntiFlash.kt:780-850`；`TargetNativeProbe.kt:546-647`
 - `impact`: 三个不同时点均满足 `successfulWriteCount = iterationCount × 17`，且计数随时间单调增加，未观察到部分成功被误计为完整一轮。
 - `repro_steps`:
   1. 分别读取 E-004、E-005 和 E-007 中的循环数与写入数。
@@ -348,7 +348,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $files
 - `status`: `validated`
 - `evidence_ids`: `[E-007, E-008, E-009]`
 - `confidence`: `high`
-- `location`: `RootAntiFlash.kt:861-947`
+- `location`: `ControlAntiFlash.kt:861-947`
 - `impact`: UI 保留 `Anti-flash stopped and rollback verified` 终态；独立线程采样确认 worker 消失。重复停止不会覆盖已经验证的回滚结果。
 - `repro_steps`:
   1. 在运行态执行停止。
@@ -363,7 +363,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $files
 - `status`: `validated`
 - `evidence_ids`: `[E-004, E-005, E-009]`
 - `confidence`: `high`
-- `location`: `RootAntiFlash.kt:273-311,341-445`
+- `location`: `ControlAntiFlash.kt:273-311,341-445`
 - `impact`: resolver 前后两次读取 maps，并只比较覆盖 6 个代码区、17 个写地址和 BSS 的唯一 mapping；无关 mapping 变化不会阻断 worker，相关 mapping 或 PID identity 变化则 fail closed。本次 PID `23696` 在多次快照间持续运行并累计写入。
 - `repro_steps`:
   1. 检查 E-009 所列 scoped fingerprint 实现。
@@ -488,7 +488,7 @@ result  = read_u64(pointer + 0x548)
 5. **停止后的目标退出尚未归因。** 回滚本身已验证，但目标为何在随后退出仍需同一轮高频进程 trace 才能闭合。
 6. **初次 UI 同步存在延迟。** 首次完整目标快照包含 `511` 个模块，自动 polling 可能延后数秒显示运行态；手动 `打开或刷新` 可以加速同步。这是状态呈现延迟，不是 worker 未运行的证据。
 7. **本轮不是长期稳定性测试。** 尚未覆盖多局游戏、前后台切换、进程重启、设备重启、低内存和长时间持续运行。
-8. **Root 权限不属于本轮链路。** 即使设备具备 Root，本次实现也没有通过 `su` 获取目标内存访问；可用性取决于同 UID、debuggable/dumpable 条件以及系统 `/proc` 策略。
+8. **访问边界。** 防闪仅在同 UID、`debuggable`/`dumpable` 条件和系统 `/proc` 策略满足时运行；任一条件变化都会触发 fail-closed。
 
 ## 8. 结论
 

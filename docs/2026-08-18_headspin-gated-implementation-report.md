@@ -7,7 +7,7 @@
 ## 0. 结论先行
 
 - `production_ready=false`：当前实现是内部 gated controller，不属于公开功能。
-- `RootFeature`、AIDL/Binder public feature list、`supportedFeatures` 和 Compose UI 均未加入 `head_spin`。
+- `ControlFeature`、AIDL/Binder public feature list、`supportedFeatures` 和 Compose UI 均未加入 `head_spin`。
 - 静态恢复、生命周期 fixture、native conversion fixture、native batch 静态契约、lint、arm64 native build 和 Debug/Release assemble 已通过。
 - target-side native/runtime identity 行为与设备验证仍为 pending；本报告不把静态构建结果当作运行时验收。
 
@@ -23,7 +23,7 @@
 | native batch contract check（8/8 invariants） | C++ loop 的 error paths 均保留 `completedCount=index`；8 个 error 状态均被覆盖 | [`../work/headspeed-recovery-20260817/headspin_native_batch_contract_check.json`](../work/headspeed-recovery-20260817/headspin_native_batch_contract_check.json) |
 | Kotlin supervisor + adapter fixtures | 12 个 supervisor 测试、7 个 native conversion 测试通过，未知 after 不会被伪造 | [`../work/headspeed-recovery-20260817/headspin_minix_verification.json`](../work/headspeed-recovery-20260817/headspin_minix_verification.json) |
 | public-surface audit | 公共 enum、AIDL、Binder、supported set、Compose feature list 均没有 `head_spin` | [`../work/feature-readiness-audit-20260818.json`](../work/feature-readiness-audit-20260818.json) |
-| public-surface static check（5 files / 0 hits） | RootModels、AIDL、RootInjection、BridgeClient、Compose feature list 均不含 `head_spin` | [`../work/headspeed-recovery-20260817/headspin_public_surface_check.json`](../work/headspeed-recovery-20260817/headspin_public_surface_check.json) |
+| public-surface static check（5 files / 0 hits） | ControlModels、AIDL、ControlInjection、BridgeClient、Compose feature list 均不含 `head_spin` | [`../work/headspeed-recovery-20260817/headspin_public_surface_check.json`](../work/headspeed-recovery-20260817/headspin_public_surface_check.json) |
 
 ## 2. 静态恢复结果
 
@@ -56,18 +56,18 @@ patched word = 0xb9005909
 
 ### 3.1 Supervisor
 
-`app/src/main/java/me/dartcv/minix/root/HeadSpin.kt` 提供：
+`app/src/main/java/me/dartcv/minix/control/HeadSpin.kt` 提供：
 
-- `RootHeadSpinExactShaTargetResolver`：唯一 module + exact SHA + 映射边界校验。
-- `RootHeadSpinSupervisor`：单 worker、重复 enable 幂等、可中断 stop/join、写入 gate 和 generation 绑定。
-- `RootHeadSpinAxisSnapshot`：记录原始轴值及每次成功回读值。
+- `ControlHeadSpinExactShaTargetResolver`：唯一 module + exact SHA + 映射边界校验。
+- `ControlHeadSpinSupervisor`：单 worker、重复 enable 幂等、可中断 stop/join、写入 gate 和 generation 绑定。
+- `ControlHeadSpinAxisSnapshot`：记录原始轴值及每次成功回读值。
 - `CodePatchOwnership` 三态：`NOT_APPLIED`、`APPLIED`、`UNCERTAIN`。
 - 未知 code after、异常或身份不匹配时保留 rollback context；不会用 expected 值冒充 after。
 - native rollback 返回 `PROFILE_MISMATCH` 但明确 observed 为 restore word 时，按“已恢复”处理；这只在 rollback 分支生效。
 
 ### 3.2 Native adapter
 
-`app/src/main/java/me/dartcv/minix/root/RootHeadSpinNativeBackend.kt` 复用 `TargetNativeProbe` 的 scoped maps u32 batch：
+`app/src/main/java/me/dartcv/minix/control/ControlHeadSpinNativeBackend.kt` 复用 `TargetNativeProbe` 的 scoped maps u32 batch：
 
 1. preflight 读取 executable code word 与两个 writable axis。
 2. guarded code-word exchange。
@@ -79,7 +79,7 @@ patched word = 0xb9005909
 
 ### 3.3 生命周期接点
 
-`RootTargetSession` 只为内部请求组装一次性 target identity；`RootFeatureService` 在 target close、invalidation、anti-flash teardown 和 service destroy 路径调用停止/回滚 helper。该实例没有 Binder 方法，也没有加入 feature catalog。
+`ControlTargetSession` 只为内部请求组装一次性 target identity；`ControlService` 在 target close、invalidation、anti-flash teardown 和 service destroy 路径调用停止/回滚 helper。该实例没有 Binder 方法，也没有加入 feature catalog。
 
 ## 4. UI 契约
 
@@ -108,7 +108,7 @@ patched word = 0xb9005909
 
 ```powershell
 .\gradlew.bat :app:testDebugUnitTest --no-daemon
-.\gradlew.bat :app:testDebugUnitTest --tests me.dartcv.minix.root.HeadSpinTest --tests me.dartcv.minix.root.HeadSpinNativeBackendTest --no-daemon
+.\gradlew.bat :app:testDebugUnitTest --tests me.dartcv.minix.control.HeadSpinTest --tests me.dartcv.minix.control.HeadSpinNativeBackendTest --no-daemon
 powershell -ExecutionPolicy Bypass -File .\tools\verify_headspin_native_batch_contract.ps1
 .\gradlew.bat :app:lintDebug --no-daemon
 .\gradlew.bat :app:externalNativeBuildDebug --no-daemon
@@ -178,10 +178,10 @@ stateDiagram-v2
 
 ## 9. 相关文件
 
-- [`../app/src/main/java/me/dartcv/minix/root/HeadSpin.kt`](../app/src/main/java/me/dartcv/minix/root/HeadSpin.kt)
-- [`../app/src/main/java/me/dartcv/minix/root/RootHeadSpinNativeBackend.kt`](../app/src/main/java/me/dartcv/minix/root/RootHeadSpinNativeBackend.kt)
-- [`../app/src/test/java/me/dartcv/minix/root/HeadSpinTest.kt`](../app/src/test/java/me/dartcv/minix/root/HeadSpinTest.kt)
-- [`../app/src/test/java/me/dartcv/minix/root/HeadSpinNativeBackendTest.kt`](../app/src/test/java/me/dartcv/minix/root/HeadSpinNativeBackendTest.kt)
+- [`../app/src/main/java/me/dartcv/minix/control/HeadSpin.kt`](../app/src/main/java/me/dartcv/minix/control/HeadSpin.kt)
+- [`../app/src/main/java/me/dartcv/minix/control/ControlHeadSpinNativeBackend.kt`](../app/src/main/java/me/dartcv/minix/control/ControlHeadSpinNativeBackend.kt)
+- [`../app/src/test/java/me/dartcv/minix/control/HeadSpinTest.kt`](../app/src/test/java/me/dartcv/minix/control/HeadSpinTest.kt)
+- [`../app/src/test/java/me/dartcv/minix/control/HeadSpinNativeBackendTest.kt`](../app/src/test/java/me/dartcv/minix/control/HeadSpinNativeBackendTest.kt)
 - [`../tools/verify_headspin_native_batch_contract.ps1`](../tools/verify_headspin_native_batch_contract.ps1)
 - [`../tools/verify_headspin_public_surface.ps1`](../tools/verify_headspin_public_surface.ps1)
 - [`../work/headspeed-recovery-20260817/HEADSPIN_MINIX_IMPLEMENTATION_DESIGN.md`](../work/headspeed-recovery-20260817/HEADSPIN_MINIX_IMPLEMENTATION_DESIGN.md)

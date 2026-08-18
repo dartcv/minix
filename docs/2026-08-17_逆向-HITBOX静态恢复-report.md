@@ -192,7 +192,7 @@ flowchart LR
 - category: design
 - status: validated
 - evidence_ids: [E-004]
-- location: `RootFeature.HITBOX` profile readiness
+- location: `ControlFeature.HITBOX` profile readiness
 - impact: 旧 worker 虽已闭合为 100 槽，但旧表/`H()` handle 模型尚无唯一的当前版本集合与生命周期映射，直接开放会形成错误功能声明。
 - confidence: high
 - repro_steps: 检查配方的 `fullFeatureReady=false` 和失败原因 `CURRENT_EXACT_SHA_FULL_ENTITY_SET_MAPPING_LIFECYCLE_NOT_UNIQUE`。
@@ -228,7 +228,7 @@ flowchart LR
 
 1. 机器配方已写入 [`production-hitbox-recipe.json`](../work/hitbox-recovery-20260817/production-hitbox-recipe.json)。
 2. 详细验证、事务写、回滚与失败枚举见 [`production-hitbox-recipe.md`](../work/hitbox-recovery-20260817/production-hitbox-recipe.md)。
-3. public `RootFeature.HITBOX` 继续 evidence-gated；UI/Controller 未就绪文案明确显示“旧 worker 100 槽已闭合，但当前 exact-SHA 全实体集合映射/生命周期未唯一化”。
+3. public `ControlFeature.HITBOX` 继续 evidence-gated；UI/Controller 未就绪文案明确显示“旧 worker 100 槽已闭合，但当前 exact-SHA 全实体集合映射/生命周期未唯一化”。
 4. 未来接线不得复用单标量 patch：必须保存原始三轴、绑定 PID/startTime/actor/loco/vptr，并支持部分写逆序回滚和逐项回读。
 
 ## 8. Timeline
