@@ -73,7 +73,7 @@ private fun SigningConfig.applyExternalSigning(input: ExternalSigningInput) {
 
 private val externalDebugSigning = project.readExternalSigningInput("debug")
 private val externalReleaseSigning = project.readExternalSigningInput("release")
-val releaseSigningRequired = providers.gradleProperty("minix.release.signingRequired").orNull
+private val releaseSigningRequired = providers.gradleProperty("minix.release.signingRequired").orNull
     ?.trim()
     ?.equals("true", ignoreCase = true)
     ?: providers.environmentVariable("MINIX_RELEASE_SIGNING_REQUIRED").orNull

@@ -20,7 +20,6 @@ minix.release.storePassword=CHANGE_ME
 minix.release.keyAlias=release
 minix.release.keyPassword=CHANGE_ME
 minix.release.storeType=PKCS12
-minix.release.signingRequired=false
 
 # Environment variable equivalents (use these instead of putting secrets in
 # a file or command line history):
