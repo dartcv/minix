@@ -1,0 +1,40 @@
+# Local IDE and Gradle state
+.gradle/
+.idea/
+.kotlin/
+build/
+**/build/
+**/.cxx/
+local.properties
+
+# Local signing material and credentials
+app/signing/
+signing.properties
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.pem
+*.key
+*.der
+
+# Generated packages and native/binary outputs
+*.apk
+*.aab
+*.apks
+*.so
+*.a
+*.dmp
+*.elf
+*.bin
+
+# Device/runtime captures and reverse-engineering workspaces
+artifacts/
+work/
+*.log
+
+# Editor/OS noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

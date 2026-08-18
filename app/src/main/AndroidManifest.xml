@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:sharedUserId="ca.sailboat.a">
+
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <queries>
+        <package android:name="com.minitech.miniworld" />
+        <package android:name="com.minitech.miniworld.vivo" />
+        <package android:name="com.minitech.miniworld.nearme.gamecenter" />
+        <package android:name="com.minitech.miniworld.TMobile.mi" />
+        <package android:name="com.minitech.miniworld.m4399" />
+        <package android:name="com.minitech.miniworld.uc" />
+        <package android:name="com.tencent.tmgp.minitech.miniworld" />
+        <package android:name="com.minitech.miniworld.kuaishou" />
+        <package android:name="com.minitech.miniworld.meta" />
+    </queries>
+
+    <application
+            android:name=".MinixApplication"
+            android:allowBackup="false"
+            android:fullBackupContent="@xml/backup_rules"
+            android:dataExtractionRules="@xml/data_extraction_rules"
+            android:label="@string/app_name"
+            android:icon="@drawable/ic_minix_launcher"
+            android:roundIcon="@drawable/ic_minix_launcher"
+            android:supportsRtl="true"
+            android:theme="@style/Theme.Minix">
+
+        <activity
+                android:name=".MainActivity"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+                android:name=".overlay.OverlayService"
+                android:exported="false"
+                android:stopWithTask="true"
+                android:foregroundServiceType="specialUse">
+            <property
+                    android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                    android:value="User-visible movable application control panel" />
+        </service>
+
+        <service
+                android:name=".root.RootFeatureService"
+                android:exported="false"
+                android:process=":control" />
+    </application>
+
+</manifest>

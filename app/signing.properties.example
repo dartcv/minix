@@ -1,0 +1,37 @@
+# Optional local/CI signing inputs. Copy to app/signing.properties (ignored)
+# or provide the equivalent MINIX_* environment variables.
+#
+# Gradle properties take precedence over environment variables. Paths are
+# resolved relative to the app module when they are not absolute.
+
+# Debug is optional. Without these values, AGP's generated debug keystore is
+# used, so a normal local assembleDebug does not need a private key.
+minix.debug.storeFile=signing/debug-keystore.p12
+minix.debug.storePassword=CHANGE_ME
+minix.debug.keyAlias=minix_testkey
+minix.debug.keyPassword=CHANGE_ME
+minix.debug.storeType=PKCS12
+
+# Release is optional. Without these values, assembleRelease intentionally
+# produces an unsigned APK. Set minix.release.signingRequired=true in CI when
+# a signed release artifact is mandatory.
+minix.release.storeFile=/absolute/path/to/release-keystore.p12
+minix.release.storePassword=CHANGE_ME
+minix.release.keyAlias=release
+minix.release.keyPassword=CHANGE_ME
+minix.release.storeType=PKCS12
+minix.release.signingRequired=false
+
+# Environment variable equivalents (use these instead of putting secrets in
+# a file or command line history):
+# MINIX_DEBUG_STORE_FILE
+# MINIX_DEBUG_STORE_PASSWORD
+# MINIX_DEBUG_KEY_ALIAS
+# MINIX_DEBUG_KEY_PASSWORD
+# MINIX_DEBUG_STORE_TYPE
+# MINIX_RELEASE_STORE_FILE
+# MINIX_RELEASE_STORE_PASSWORD
+# MINIX_RELEASE_KEY_ALIAS
+# MINIX_RELEASE_KEY_PASSWORD
+# MINIX_RELEASE_STORE_TYPE
+# MINIX_RELEASE_SIGNING_REQUIRED=true

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">minix</string>
+    <string name="overlay_channel_name">悬浮工具</string>
+    <string name="overlay_channel_description">显示 minix 悬浮工具运行状态</string>
+    <string name="overlay_notification_title">minix 悬浮工具正在运行</string>
+    <string name="overlay_notification_text">点击停止悬浮面板</string>
+    <string name="overlay_notification_stop">停止</string>
+</resources>

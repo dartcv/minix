@@ -1,0 +1,11 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.Minix" parent="android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/mint</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/mist_blue</item>
+        <item name="android:navigationBarColor">@color/panel_white</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>

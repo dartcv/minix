@@ -1,0 +1,9 @@
+/build
+/signing.properties
+
+# Local signing material and credentials. Keep only the example file tracked.
+/signing/*.p12
+/signing/*.jks
+/signing/*.keystore
+/signing/*.pfx
+/signing/*.properties
